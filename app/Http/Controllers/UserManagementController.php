@@ -30,17 +30,62 @@ class UserManagementController extends Controller
     public function updateRole(Request $request, User $user)
     {
         $request->validate([
-            'role' => 'required|in:admin,contributor,viewer'
+            'role' => 'required|in:admin,contributor,viewer',
+            'name' => 'required|string|max:255',
+            'password' => 'nullable|string|min:8|max:64|confirmed',
         ]);
 
         // Prevent user from changing their own role
-        if (auth()->user()->id === $user->id) {
+        if (auth()->user()->id === $user->id && $request->role !== $user->role) {
             return back()->withErrors(['role' => 'You cannot change your own role']);
         }
 
-        $user->update(['role' => $request->role]);
+        $update = [
+            'name' => $request->name,
+            'role' => $request->role,
+        ];
 
-        return back()->with('success', 'User role updated successfully');
+        if ($request->filled('password')) {
+            $update['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
+
+        $user->update($update);
+
+        return back()->with('success', 'User updated successfully');
+    }
+
+    /**
+     * Ban a user
+     */
+    public function ban(Request $request, User $user)
+    {
+        if (auth()->user()->id === $user->id) {
+            return back()->withErrors(['error' => 'You cannot ban yourself']);
+        }
+
+        $request->validate([
+            'banned_reason' => 'nullable|string|max:500'
+        ]);
+
+        $user->update([
+            'banned' => true,
+            'banned_reason' => $request->banned_reason,
+        ]);
+
+        return back()->with('success', 'User has been banned');
+    }
+
+    /**
+     * Unban a user
+     */
+    public function unban(User $user)
+    {
+        $user->update([
+            'banned' => false,
+            'banned_reason' => null,
+        ]);
+
+        return back()->with('success', 'User has been unbanned');
     }
 
     /**

@@ -200,27 +200,44 @@
                 </thead>
                 <tbody>
                     @forelse($users as $user)
-                        <tr>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>
-                                <span class="role-badge {{ $user->role }}">
-                                    {{ ucfirst($user->role) }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="actions">
-                                    <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-edit">Edit</a>
-                                    @if(auth()->user()->id !== $user->id)
-                                        <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-delete">Delete</button>
-                                        </form>
+                            <tr>
+                                <td>
+                                    {{ $user->name }}
+                                    @if($user->banned)
+                                        <div style="font-size:12px; color:#ffcccc;">(Banned)</div>
                                     @endif
-                                </div>
-                            </td>
-                        </tr>
+                                </td>
+                                <td>{{ $user->email }}</td>
+                                <td>
+                                    <span class="role-badge {{ $user->role }}">
+                                        {{ ucfirst($user->role) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-edit">Edit</a>
+                                        @if(auth()->user()->id !== $user->id)
+                                            @if($user->banned)
+                                                <form method="POST" action="{{ route('admin.users.unban', $user->id) }}" style="display:inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn-edit">Unban</button>
+                                                </form>
+                                            @else
+                                                <form method="POST" action="{{ route('admin.users.ban', $user->id) }}" style="display:inline" onsubmit="return confirm('Ban this user?');">
+                                                    @csrf
+                                                    <input type="hidden" name="banned_reason" value="Banned by admin">
+                                                    <button type="submit" class="btn-delete">Ban</button>
+                                                </form>
+                                            @endif
+                                            <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display: inline;" onsubmit="return confirm('Delete this user? This is permanent.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn-delete">Delete</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
                     @empty
                         <tr>
                             <td colspan="4" style="text-align: center; color: #aaa;">No users found</td>

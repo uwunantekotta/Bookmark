@@ -27,6 +27,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role', // <--- ADDED: 'role' attribute
+        'banned',
+        'banned_reason',
     ];
 
     /**
@@ -66,5 +68,13 @@ class User extends Authenticatable
     public function isViewer(): bool
     {
         return $this->role === self::ROLE_VIEWER;
+    }
+
+    /**
+     * Check if user is banned.
+     */
+    public function isBanned(): bool
+    {
+        return (bool) $this->banned;
     }
 }

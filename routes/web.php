@@ -138,6 +138,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/', [UserManagementController::class, 'index'])->name('index');
         Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('edit');
         Route::put('/{user}/role', [UserManagementController::class, 'updateRole'])->name('updateRole');
+        Route::post('/{user}/ban', [UserManagementController::class, 'ban'])->name('ban');
+        Route::post('/{user}/unban', [UserManagementController::class, 'unban'])->name('unban');
         Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
     });
 

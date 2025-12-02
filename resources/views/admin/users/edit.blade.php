@@ -166,12 +166,12 @@
 
             <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" value="{{ $user->name }}" readonly class="readonly">
+                <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" required>
             </div>
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" value="{{ $user->email }}" readonly class="readonly">
+                <input type="email" id="email" name="email" value="{{ $user->email }}" readonly class="readonly">
             </div>
 
             <div class="form-group">
@@ -181,6 +181,25 @@
                     <option value="contributor" {{ $user->role === 'contributor' ? 'selected' : '' }}>Contributor (Upload songs)</option>
                     <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin (Full access)</option>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label for="password">New password (leave blank to keep current)</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <div class="form-group">
+                <label for="password_confirmation">Confirm new password</label>
+                <input type="password" id="password_confirmation" name="password_confirmation">
+            </div>
+
+            <div class="form-group">
+                @if($user->banned)
+                    <p style="color:#ffcccc">This user is currently banned. Reason: {{ $user->banned_reason }}</p>
+                    <form method="POST" action="{{ route('admin.users.unban', $user->id) }}">
+                        @csrf
+                        <button type="submit" class="back-btn" style="margin-top:6px;">Unban user</button>
+                    </form>
+                @endif
             </div>
 
             <div class="button-group">
