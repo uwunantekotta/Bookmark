@@ -11,5 +11,5 @@ class Bookmark extends Model
     protected $fillable = [
         'user_id', 'title', 'artist', 'url', 'image'
     ];
-}php artisan make:controller BookmarkController
+}
 
