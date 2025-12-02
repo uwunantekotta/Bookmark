@@ -201,54 +201,54 @@
                 </thead>
                 <tbody>
                     @forelse($users as $user)
-                            <tr>
-                                <td>
-                                    {{ $user->name }}
-                                    @if($user->banned)
-                                        <div style="font-size:12px; color:#ffcccc;">(Banned)</div>
-                                    @endif
-                                </td>
-                                <td>{{ $user->email }}</td>
-                                <td>
-                                    <span class="role-badge {{ $user->role }}">
-                                        {{ ucfirst($user->role) }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="actions">
-                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-edit">Edit</a>
-                                        @if(auth()->user()->id !== $user->id)
-                                            @if($user->banned)
-                                                <form method="POST" action="{{ route('admin.users.unban', $user->id) }}" style="display:inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn-edit">Unban</button>
-                                                </form>
-                                            @else
-                                                <form method="POST" action="{{ route('admin.users.ban', $user->id) }}" style="display:inline" onsubmit="return confirm('Ban this user?');">
-                                                    @csrf
-                                                    <input type="hidden" name="banned_reason" value="Banned by admin">
-                                                    <button type="submit" class="btn-delete">Ban</button>
-                                                </form>
-                                            @endif
-                                            <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display: inline;" onsubmit="return confirm('Delete this user? This is permanent.');">
+                        <tr>
+                            <td>
+                                {{ $user->name }}
+                                @if($user->banned)
+                                    <div style="font-size:12px; color:#ffcccc;">(Banned)</div>
+                                @endif
+                            </td>
+                            <td>{{ $user->email }}</td>
+                            <td>
+                                <span class="role-badge {{ $user->role }}">
+                                    {{ ucfirst($user->role) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="font-weight:700;">⭐ {{ number_format($user->rating_avg ?? 0, 1) }}</div>
+                                <div style="font-size:12px; color:#aaa;">{{ $user->reviews_count ?? 0 }} reviews</div>
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-edit">Edit</a>
+                                    @if(auth()->user()->id !== $user->id)
+                                        @if($user->banned)
+                                            <form method="POST" action="{{ route('admin.users.unban', $user->id) }}" style="display:inline">
                                                 @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn-delete">Delete</button>
+                                                <button type="submit" class="btn-edit">Unban</button>
+                                            </form>
+                                        @else
+                                            <form method="POST" action="{{ route('admin.users.ban', $user->id) }}" style="display:inline" onsubmit="return confirm('Ban this user?');">
+                                                @csrf
+                                                <input type="hidden" name="banned_reason" value="Banned by admin">
+                                                <button type="submit" class="btn-delete">Ban</button>
                                             </form>
                                         @endif
-                                    </div>
-                                </td>
-                                <td>
-                                    {{ $user->email }}</td>
-                                <td>
-                                    <span class="role-badge {{ $user->role }}">
-                                        {{ ucfirst($user->role) }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div style="font-weight:700;">⭐ {{ number_format($user->rating_avg ?? 0, 1) }}</div>
-                                    <div style="font-size:12px; color:#aaa;">{{ $user->reviews_count ?? 0 }} reviews</div>
-                                </td>
+                                        <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" style="display: inline;" onsubmit="return confirm('Delete this user? This is permanent.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-delete">Delete</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #aaa;">No users found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
             </table>
         </div>
 

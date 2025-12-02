@@ -6,235 +6,42 @@
     <title>Admin Dashboard – Audiobook</title>
     <link href="https://fonts.cdnfonts.com/css/formula1-display" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        :root {
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-            color: #fff;
-            /* Initialize CSS variables for mouse interaction */
-            --move-x: 0px;
-            --move-y: 0px;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            /* Removed static background to use animated layers */
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* --- BACKGROUND LAYERS --- */
-        .bg-layer {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .bg-blue {
-            background: linear-gradient(135deg, #0a4bff 0%, #0080ff 60%, #00a4ff 100%);
-            z-index: -10;
-        }
-
-        .bg-gray {
-            background: linear-gradient(135deg, #2b2b2b 0%, #3a3a3a 60%, #4f4f4f 100%);
-            z-index: -9;
-            opacity: 0;
-            animation: fadeCycle 15s infinite ease-in-out;
-        }
-
-        @keyframes fadeCycle {
-            0%, 40% { opacity: 0; }
-            50%, 90% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            inset: -5%;
-            width: 110%;
-            height: 110%;
-            z-index: -4;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 800'%3E%3Cpath fill='%23ffffff' fill-opacity='0.05' d='M0,256L48,261.3C96,267,192,277,288,293.3C384,309,480,331,576,314.7C672,299,768,245,864,245.3C960,245,1056,299,1152,298.7C1248,299,1344,245,1392,218.7L1440,192L1440,800L1392,800C1344,800,1248,800,1152,800C1056,800,960,800,864,800C768,800,672,800,576,800C480,800,384,800,288,800C192,800,96,800,48,800L0,800Z'%3E%3C/path%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,416L48,421.3C96,427,192,437,288,421.3C384,405,480,363,576,362.7C672,363,768,405,864,432C960,459,1056,469,1152,448C1248,427,1344,373,1392,346.7L1440,320L1440,800L1392,800C1344,800,1248,800,1152,800C1056,800,960,800,864,800C768,800,672,800,576,800C480,800,384,800,288,800C192,800,96,800,48,800L0,800Z'%3E%3C/path%3E%3Cpath fill='%23ffffff' fill-opacity='0.15' d='M0,576L48,586.7C96,597,192,619,288,602.7C384,587,480,533,576,512C672,491,768,501,864,528C960,555,1056,597,1152,597.3C1248,597,1344,555,1392,533.3L1440,512L1440,800L1392,800C1344,800,1248,800,1152,800C1056,800,960,800,864,800C768,800,672,800,576,800C480,800,384,800,288,800C192,800,96,800,48,800L0,800Z'%3E%3C/path%3E%3C/svg%3E");
-            background-size: cover;
-            background-position: center bottom;
-            opacity: 0.4;
-            pointer-events: none;
-            
-            /* Interactive transform */
-            transform: translate(var(--move-x), var(--move-y));
-            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        /* --- WAVE ANIMATIONS --- */
-        .waves-container {
-            position: fixed;
-            left: -10%;
-            width: 120%;
-            height: 50vh;
-            z-index: -1;
-            pointer-events: none;
-        }
-
+        /* [Previous CSS remains exactly the same] */
+        * { box-sizing: border-box; }
+        :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #fff; --move-x: 0px; --move-y: 0px; }
+        body { margin: 0; min-height: 100vh; overflow-x: hidden; position: relative; }
+        .bg-layer { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+        .bg-blue { background: linear-gradient(135deg, #0a4bff 0%, #0080ff 60%, #00a4ff 100%); z-index: -10; }
+        .bg-gray { background: linear-gradient(135deg, #2b2b2b 0%, #3a3a3a 60%, #4f4f4f 100%); z-index: -9; opacity: 0; animation: fadeCycle 15s infinite ease-in-out; }
+        @keyframes fadeCycle { 0%, 40% { opacity: 0; } 50%, 90% { opacity: 1; } 100% { opacity: 0; } }
+        body::before { content: ""; position: fixed; inset: -5%; width: 110%; height: 110%; z-index: -4; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 800'%3E%3Cpath fill='%23ffffff' fill-opacity='0.05' d='M0,256L48,261.3C96,267,192,277,288,293.3C384,309,480,331,576,314.7C672,299,768,245,864,245.3C960,245,1056,299,1152,298.7C1248,299,1344,245,1392,218.7L1440,192L1440,800L1392,800C1344,800,1248,800,1152,800C1056,800,960,800,864,800C768,800,672,800,576,800C480,800,384,800,288,800C192,800,96,800,48,800L0,800Z'%3E%3C/path%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,416L48,421.3C96,427,192,437,288,421.3C384,405,480,363,576,362.7C672,363,768,405,864,432C960,459,1056,469,1152,448C1248,427,1344,373,1392,346.7L1440,320L1440,800L1392,800C1344,800,1248,800,1152,800C1056,800,960,800,864,800C768,800,672,800,576,800C480,800,384,800,288,800C192,800,96,800,48,800L0,800Z'%3E%3C/path%3E%3Cpath fill='%23ffffff' fill-opacity='0.15' d='M0,576L48,586.7C96,597,192,619,288,602.7C384,587,480,533,576,512C672,491,768,501,864,528C960,555,1056,597,1152,597.3C1248,597,1344,555,1392,533.3L1440,512L1440,800L1392,800C1344,800,1248,800,1152,800C1056,800,960,800,864,800C768,800,672,800,576,800C480,800,384,800,288,800C192,800,96,800,48,800L0,800Z'%3E%3C/path%3E%3C/svg%3E"); background-size: cover; background-position: center bottom; opacity: 0.4; pointer-events: none; transform: translate(var(--move-x), var(--move-y)); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .waves-container { position: fixed; left: -10%; width: 120%; height: 50vh; z-index: -1; pointer-events: none; }
         .waves-bottom { bottom: -100px; }
         .waves-top { top: -100px; transform: rotate(180deg); }
-
-        .waves {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            margin-bottom: -7px;
-            min-height: 100px;
-            transform: translate3d(var(--move-x), var(--move-y), 0);
-            transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        .parallax > use {
-            animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite;
-        }
+        .waves { position: relative; width: 100%; height: 100%; margin-bottom: -7px; min-height: 100px; transform: translate3d(var(--move-x), var(--move-y), 0); transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .parallax > use { animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite; }
         .parallax > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; fill: rgba(255, 255, 255, 0.05); }
         .parallax > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; fill: rgba(255, 255, 255, 0.1); }
         .parallax > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; fill: rgba(255, 255, 255, 0.15); }
         .parallax > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; fill: rgba(255, 255, 255, 0.2); }
-
-        @keyframes move-forever {
-            0% { transform: translate3d(-90px, 0, 0); }
-            100% { transform: translate3d(85px, 0, 0); }
-        }
-
-        /* --- DASHBOARD STYLES --- */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            /* Ensure content sits above waves */
-            z-index: 1;
-            position: relative;
-        }
-
-        header {
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(8px);
-            padding: 20px 30px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        h1 {
-            font-family: 'Formula1 Display', sans-serif;
-            font-size: 28px;
-            margin: 0;
-        }
-
-        .logout-btn {
-            background: #ff4444;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #cc0000;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .dashboard-card {
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(8px);
-            padding: 25px;
-            border-radius: 16px;
-            border-left: 4px solid #00f0ff;
-        }
-
-        .dashboard-card.pending {
-            border-left-color: #ffaa00;
-        }
-
-        .dashboard-card.approved {
-            border-left-color: #44dd44;
-        }
-
-        .dashboard-card.rejected {
-            border-left-color: #ff4444;
-        }
-
-        .card-title {
-            font-size: 14px;
-            color: #aaa;
-            margin: 0 0 10px;
-            text-transform: uppercase;
-        }
-
-        .card-value {
-            font-size: 32px;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .admin-menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .menu-card {
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(8px);
-            padding: 30px;
-            border-radius: 16px;
-            text-align: center;
-            transition: 0.3s;
-        }
-
-        .menu-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 240, 255, 0.3);
-        }
-
-        .menu-card h2 {
-            font-size: 20px;
-            margin: 0 0 10px;
-        }
-
-        .menu-card p {
-            color: #aaa;
-            font-size: 14px;
-            margin: 0 0 15px;
-        }
-
-        .menu-card a {
-            display: inline-block;
-            background: #00f0ff;
-            color: #000;
-            padding: 10px 25px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-
-        .menu-card a:hover {
-            background: #00d4e8;
-        }
+        @keyframes move-forever { 0% { transform: translate3d(-90px, 0, 0); } 100% { transform: translate3d(85px, 0, 0); } }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; z-index: 1; position: relative; }
+        header { background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(8px); padding: 20px 30px; border-radius: 16px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        h1 { font-family: 'Formula1 Display', sans-serif; font-size: 28px; margin: 0; }
+        .logout-btn { background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .logout-btn:hover { background: #cc0000; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .dashboard-card { background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(8px); padding: 25px; border-radius: 16px; border-left: 4px solid #00f0ff; }
+        .dashboard-card.posts { border-left-color: #ffaa00; }
+        .card-title { font-size: 14px; color: #aaa; margin: 0 0 10px; text-transform: uppercase; }
+        .card-value { font-size: 32px; font-weight: bold; margin: 0; }
+        .admin-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        .menu-card { background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(8px); padding: 30px; border-radius: 16px; text-align: center; transition: 0.3s; }
+        .menu-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0, 240, 255, 0.3); }
+        .menu-card h2 { font-size: 20px; margin: 0 0 10px; }
+        .menu-card p { color: #aaa; font-size: 14px; margin: 0 0 15px; }
+        .menu-card a { display: inline-block; background: #00f0ff; color: #000; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-weight: 600; transition: 0.2s; }
+        .menu-card a:hover { background: #00d4e8; }
     </style>
 </head>
 <body>
@@ -272,17 +79,9 @@
                 <p class="card-title">Total Music</p>
                 <p class="card-value">{{ $totalMusic }}</p>
             </div>
-            <div class="dashboard-card pending">
-                <p class="card-title">Pending Songs</p>
-                <p class="card-value">{{ $pendingMusic }}</p>
-            </div>
-            <div class="dashboard-card approved">
-                <p class="card-title">Approved Songs</p>
-                <p class="card-value">{{ $approvedMusic }}</p>
-            </div>
-            <div class="dashboard-card rejected">
-                <p class="card-title">Rejected Songs</p>
-                <p class="card-value">{{ $rejectedMusic }}</p>
+            <div class="dashboard-card posts">
+                <p class="card-title">Total Posts</p>
+                <p class="card-value">{{ $totalPosts }}</p>
             </div>
         </div>
 
@@ -300,7 +99,7 @@
             <div class="menu-card">
                 <h2>🎵 Manage Posts</h2>
                 <p>Review, approve, reject, and manage song uploads</p>
-                <a href="{{ route('admin.music.index') }}">Manage Posts</a>
+                <a href="{{ route('admin.posts.index') }}">Manage Posts</a>
             </div>
         </div>
     </div>

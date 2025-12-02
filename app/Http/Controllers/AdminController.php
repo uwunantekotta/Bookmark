@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Music;
+use App\Models\Bookmark; // Imported Bookmark model
 
 class AdminController extends Controller
 {
@@ -15,16 +16,16 @@ class AdminController extends Controller
     {
         $totalUsers = User::count();
         $totalMusic = Music::count();
-        $pendingMusic = Music::where('status', 'pending')->count();
-        $approvedMusic = Music::where('status', 'approved')->count();
-        $rejectedMusic = Music::where('status', 'rejected')->count();
+        $totalBookmarks = Bookmark::count();
+        
+        // Calculate total posts (Music + Bookmarks)
+        $totalPosts = $totalMusic + $totalBookmarks;
 
+        // Removed pending/approved/rejected logic
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalMusic',
-            'pendingMusic',
-            'approvedMusic',
-            'rejectedMusic'
+            'totalPosts'
         ));
     }
 }
