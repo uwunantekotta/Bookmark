@@ -236,6 +236,9 @@ input[type="text"], input[type="url"], input[type="file"] {
     cursor: pointer;
     font-size: 15px;
     font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
 }
 
 .btn-primary { background: #fff; color: #0057ff; }
@@ -305,8 +308,7 @@ input[type="text"], input[type="url"], input[type="file"] {
     <nav>
         <a href="{{ route('welcome') }}">Home</a>
         <a href="{{ route('feed') }}">Feed</a>
-        <a href="{{ route('bookmarks') }}">Add Bookmark</a>
-        <a href="{{ route('bookmarks') }}">Bookmarks</a>
+        <a href="{{ route('welcome_clean') }}">Bookmarks</a>
     </nav>
 
     <div class="auth-controls">
@@ -323,6 +325,8 @@ input[type="text"], input[type="url"], input[type="file"] {
                 @csrf
                 <button type="submit" class="logout-btn">Logout</button>
             </form>
+        @else
+            <a href="{{ route('login') }}" class="btn-ghost" style="padding: 8px 16px; border-radius: 50px; font-size: 13px;">Sign In</a>
         @endauth
     </div>
 </header>
@@ -330,30 +334,39 @@ input[type="text"], input[type="url"], input[type="file"] {
 <main>
     <div class="column-left">
         <div class="card">
-            <h2>Add Music Bookmark</h2>
-            <p>Save songs, album pages, artist pages, and streaming links.</p>
+            @auth
+                <h2>Add Music Bookmark</h2>
+                <p>Save songs, album pages, artist pages, and streaming links.</p>
 
-            <form action="{{ url('/bookmarks') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <input type="text" name="title" placeholder="Song title (optional)">
-                <input type="text" name="artist" placeholder="Artist (required)" required>
-                <input type="url" name="url" placeholder="https://open.spotify.com/track/..." required>
-                <label style="font-size:13px; opacity:0.8;">Release date (optional)</label>
-                <input type="date" name="release_date" style="width:100%; padding:12px 14px; border: 1px solid rgba(255,255,255,0.4); border-radius:8px; background: rgba(255,255,255,0.06); color:#fff; margin-bottom:8px;">
-                <label style="font-size:13px; opacity:0.8;">Attach photo (optional)</label>
-                <input type="file" name="image" accept="image/*">
+                <form action="{{ url('/bookmarks') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="text" name="title" placeholder="Song title (optional)">
+                    <input type="text" name="artist" placeholder="Artist (required)" required>
+                    <input type="url" name="url" placeholder="https://open.spotify.com/track/..." required>
+                    <label style="font-size:13px; opacity:0.8;">Release date (optional)</label>
+                    <input type="date" name="release_date" style="width:100%; padding:12px 14px; border: 1px solid rgba(255,255,255,0.4); border-radius:8px; background: rgba(255,255,255,0.06); color:#fff; margin-bottom:8px;">
+                    <label style="font-size:13px; opacity:0.8;">Attach photo (optional)</label>
+                    <input type="file" name="image" accept="image/*">
 
-                <div style="display:flex; gap:8px; justify-content:center; margin-top:4px;">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="reset" class="btn btn-ghost">Clear</button>
+                    <div style="display:flex; gap:8px; justify-content:center; margin-top:4px;">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="reset" class="btn btn-ghost">Clear</button>
+                    </div>
+                </form>
+
+                @if(session('success'))
+                    <p style="margin-top:10px;text-align:center;color:#00f0ff;font-size:14px;">
+                        {{ session('success') }}
+                    </p>
+                @endif
+            @else
+                <h2>Join the Community</h2>
+                <p>Sign in to upload your own bookmarks and save music.</p>
+                <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                    <a href="{{ route('login') }}" class="btn btn-primary">Sign In</a>
+                    <a href="{{ route('register') }}" class="btn btn-ghost">Register</a>
                 </div>
-            </form>
-
-            @if(session('success'))
-                <p style="margin-top:10px;text-align:center;color:#00f0ff;font-size:14px;">
-                    {{ session('success') }}
-                </p>
-            @endif
+            @endauth
         </div>
     </div>
 
@@ -406,7 +419,7 @@ input[type="text"], input[type="url"], input[type="file"] {
                 @if($bookmark->image)
                     <img src="{{ asset('storage/' . $bookmark->image) }}">
                 @else
-                    <img src="https://via.placeholder.com/72">
+                    <img src="https://via.placeholder.com/72?text=Music">
                 @endif
 
                 <div style="flex:1;">
@@ -415,6 +428,7 @@ input[type="text"], input[type="url"], input[type="file"] {
                     </a>
                     <div class="tags">{{ $bookmark->artist }} @if($bookmark->genre) · <em>{{ $bookmark->genre }}</em>@endif</div>
                     <div style="font-size:12px; color:#aaa; margin-top:6px;">
+                        Posted by <strong>{{ $bookmark->user->name ?? 'Unknown' }}</strong> · 
                         ⭐ {{ number_format($bookmark->rating_avg,1) }} · {{ $bookmark->reviews_count }} reviews · {{ $bookmark->views }} views
                     </div>
 
@@ -429,7 +443,7 @@ input[type="text"], input[type="url"], input[type="file"] {
                 </div>
             </div>
         @empty
-            <div class="card">No results found.</div>
+            <div class="card">No bookmarks found.</div>
         @endforelse
 
         <div style="margin-top:12px;">{{ $bookmarks->links() }}</div>

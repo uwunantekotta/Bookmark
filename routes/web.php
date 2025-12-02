@@ -22,19 +22,9 @@ Route::get('/welcome', function () {
     return view('welcome');
 })->name('welcome');
 
-// ------------------------
-// Welcome Clean (show bookmarks on right side)
-// ------------------------
-
+// MOVED: Public access to the bookmarks list
 Route::get('/welcome_clean', [BookmarkController::class, 'showWelcome'])
-    ->middleware('auth')
     ->name('welcome_clean');
-
-// Unified Feed (available to authenticated users)
-Route::get('/feed', [FeedController::class, 'index'])
-    ->middleware('auth')
-    ->name('feed');
-
 
 // ------------------------
 // Registration
@@ -111,21 +101,19 @@ Route::post('/logout', function (Request $request) {
 
 
 // ------------------------
-// Bookmarks (CRUD)
+// Authenticated Routes
 // ------------------------
 
 Route::middleware('auth')->group(function () {
+    // Unified Feed
+    Route::get('/feed', [FeedController::class, 'index'])->name('feed');
+
+    // Bookmarks (CRUD)
     Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks');
     Route::post('/bookmarks', [BookmarkController::class, 'store']);
     Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy']);
-});
 
-
-// ------------------------
-// Music Upload
-// ------------------------
-
-Route::middleware('auth')->group(function () {
+    // Music Upload
     Route::get('/music', [MusicController::class, 'index'])->name('music.index');
     Route::post('/music', [MusicController::class, 'store'])->name('music.store');
 });

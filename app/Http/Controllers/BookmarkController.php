@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class BookmarkController extends Controller
 {
-    // Show full bookmarks list (bookmarks.blade.php)
+    // Show full bookmarks list (bookmarks.blade.php) - Restricted to logged in user's own list
     public function index()
     {
         $bookmarks = Bookmark::where('user_id', Auth::id())
@@ -19,10 +19,11 @@ class BookmarkController extends Controller
         return view('bookmarks', compact('bookmarks'));
     }
 
-    // Show bookmarks on welcome_clean page (RIGHT COLUMN) with sorting/filtering
+    // Show public bookmarks list on welcome_clean page (RIGHT COLUMN)
     public function showWelcome(Request $request)
     {
-        $query = Bookmark::query();
+        // CHANGED: Added with('user') to eager load the author for the public list
+        $query = Bookmark::with('user');
 
         // Optionally filter by genre
         if ($request->filled('genre')) {
