@@ -22,7 +22,7 @@ class BookmarkController extends Controller
     // Show public bookmarks list on welcome_clean page (RIGHT COLUMN)
     public function showWelcome(Request $request)
     {
-        // CHANGED: Added with('user') to eager load the author for the public list
+        // Eager load the author for the public list
         $query = Bookmark::with('user');
 
         // Optionally filter by genre
@@ -43,7 +43,6 @@ class BookmarkController extends Controller
         $sortBy = $request->get('sort_by', 'created_at');
         $order = $request->get('order', 'desc');
 
-        // Allow only specific sortable columns
         $allowedSorts = ['artist','title','genre','rating_avg','reviews_count','views','created_at'];
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'created_at';
@@ -53,7 +52,6 @@ class BookmarkController extends Controller
 
         $bookmarks = $query->orderBy($sortBy, $order)->paginate(20)->withQueryString();
 
-        // Provide distinct genres for filter dropdown
         $genres = Bookmark::select('genre')->whereNotNull('genre')->distinct()->pluck('genre');
 
         return view('welcome_clean', compact('bookmarks', 'genres'));
@@ -82,7 +80,9 @@ class BookmarkController extends Controller
 
         Bookmark::create($data);
 
-        return back()->with('success', 'Bookmark saved!');
+        // --- CHANGE HERE ---
+        // Instead of return back(), we force a redirect to the welcome_clean route.
+        return redirect()->route('welcome_clean')->with('success', 'Bookmark saved!');
     }
 
     // Optional: delete a bookmark
@@ -99,6 +99,7 @@ class BookmarkController extends Controller
 
         $bookmark->delete();
 
-        return back()->with('success', 'Bookmark deleted.');
+        // Redirect explicitly here as well to be safe
+        return redirect()->route('welcome_clean')->with('success', 'Bookmark deleted.');
     }
 }
