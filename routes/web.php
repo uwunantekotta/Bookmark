@@ -11,6 +11,7 @@ use App\Http\Controllers\MusicController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\MusicApprovalController;
+use App\Http\Controllers\FeedController;
 
 
 // ------------------------
@@ -28,6 +29,11 @@ Route::get('/welcome', function () {
 Route::get('/welcome_clean', [BookmarkController::class, 'showWelcome'])
     ->middleware('auth')
     ->name('welcome_clean');
+
+// Unified Feed (available to authenticated users)
+Route::get('/feed', [FeedController::class, 'index'])
+    ->middleware('auth')
+    ->name('feed');
 
 
 // ------------------------

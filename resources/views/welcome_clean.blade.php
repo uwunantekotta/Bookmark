@@ -304,6 +304,7 @@ input[type="text"], input[type="url"], input[type="file"] {
 
     <nav>
         <a href="{{ route('welcome') }}">Home</a>
+        <a href="{{ route('feed') }}">Feed</a>
         <a href="{{ route('bookmarks') }}">Add Bookmark</a>
         <a href="{{ route('bookmarks') }}">Bookmarks</a>
     </nav>
