@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class BookmarkController extends Controller
 {
-    // Private Dashboard (User's personal list)
+    // ... [index method remains same] ...
     public function index()
     {
         $bookmarks = Bookmark::where('user_id', Auth::id())
@@ -19,18 +19,21 @@ class BookmarkController extends Controller
         return view('bookmarks', compact('bookmarks'));
     }
 
-    // Public Page (The one with the form and list on the right)
+    // Public Page
     public function showWelcome(Request $request)
     {
-        // 1. Load bookmarks with the user who created them
+        // Viewers are not allowed on this page, redirect to feed
+        if (Auth::check() && Auth::user()->role === 'viewer') {
+            return redirect()->route('feed');
+        }
+
+        // ... [Rest of logic remains same] ...
         $query = Bookmark::with('user');
 
-        // 2. Filter by Genre
         if ($request->filled('genre')) {
             $query->where('genre', 'like', '%' . $request->genre . '%');
         }
 
-        // 3. Search by Text
         if ($request->filled('q')) {
             $q = $request->q;
             $query->where(function($sub) use ($q) {
@@ -39,9 +42,7 @@ class BookmarkController extends Controller
             });
         }
 
-        // 4. Sorting
         $sortBy = $request->get('sort_by', 'created_at');
-        // Whitelist allowed columns to prevent SQL errors
         $allowedSorts = ['artist','title','genre','rating_avg','reviews_count','views','created_at'];
         if (!in_array($sortBy, $allowedSorts)) $sortBy = 'created_at';
         
@@ -50,19 +51,18 @@ class BookmarkController extends Controller
 
         $bookmarks = $query->orderBy($sortBy, $order)->paginate(20)->withQueryString();
         
-        // Populate the genre dropdown
         $genres = Bookmark::select('genre')->whereNotNull('genre')->distinct()->pluck('genre');
 
         return view('welcome_clean', compact('bookmarks', 'genres'));
     }
 
-    // Save Logic
+    // ... [Rest of Controller logic matches existing file] ...
     public function store(Request $request)
     {
         $data = $request->validate([
             'title' => 'nullable|string|max:255',
             'artist' => 'required|string|max:255',
-            'genre' => 'nullable|string|max:255', // Added genre validation
+            'genre' => 'nullable|string|max:255',
             'url' => 'required|url',
             'image' => 'nullable|image|max:2048',
             'release_date' => 'nullable|date'
@@ -77,11 +77,9 @@ class BookmarkController extends Controller
 
         Bookmark::create($data);
 
-        // Force redirect to the "welcome_clean" route
         return redirect()->route('welcome_clean')->with('success', 'Bookmark saved!');
     }
 
-    // Delete Logic
     public function destroy($id)
     {
         $bookmark = Bookmark::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
@@ -92,7 +90,6 @@ class BookmarkController extends Controller
 
         $bookmark->delete();
 
-        // Redirect back to welcome_clean
         return redirect()->route('welcome_clean')->with('success', 'Bookmark deleted.');
     }
 }

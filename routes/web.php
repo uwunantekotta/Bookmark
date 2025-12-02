@@ -9,10 +9,8 @@ use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\PostManagementController; // Changed from MusicApprovalController
+use App\Http\Controllers\PostManagementController;
 use App\Http\Controllers\FeedController;
-
-// ... [Previous Auth & Public Routes remain unchanged] ...
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,12 +20,13 @@ Route::get('/welcome', function () {
     return view('welcome');
 });
 
+// Public/Home page (Controller now handles viewer redirect)
 Route::get('/welcome_clean', [BookmarkController::class, 'showWelcome'])
     ->name('welcome_clean');
 
-// Authentication Routes...
+// --- Authentication Routes ---
 Route::get('/register', function () {
-    if (Auth::check()) return redirect('/welcome_clean');
+    if (Auth::check()) return redirect()->route(Auth::user()->role === 'viewer' ? 'feed' : 'welcome_clean');
     return view('auth.register');
 })->name('register');
 
@@ -48,11 +47,16 @@ Route::post('/register', function (Request $request) {
 
     Auth::login($user);
     $request->session()->regenerate();
-    return redirect('/welcome_clean');
+    
+    // Redirect Viewers to Feed, others to Home
+    if ($user->role === 'viewer') {
+        return redirect()->route('feed');
+    }
+    return redirect()->route('welcome_clean');
 });
 
 Route::get('/login', function () {
-    if (Auth::check()) return redirect('/welcome_clean');
+    if (Auth::check()) return redirect()->route(Auth::user()->role === 'viewer' ? 'feed' : 'welcome_clean');
     return view('auth.login');
 })->name('login');
 
@@ -64,6 +68,11 @@ Route::post('/login', function (Request $request) {
 
     if (Auth::attempt($credentials, $request->boolean('remember'))) {
         $request->session()->regenerate();
+        
+        // Redirect Viewers to Feed, others to Home (or intended)
+        if (Auth::user()->role === 'viewer') {
+            return redirect()->route('feed');
+        }
         return redirect()->intended('/welcome_clean');
     }
 
@@ -79,18 +88,24 @@ Route::post('/logout', function (Request $request) {
     return redirect()->route('welcome');
 })->name('logout');
 
-// Authenticated Routes
+// --- Authenticated Routes ---
 Route::middleware('auth')->group(function () {
+    // Accessible by ALL logged in users (Viewers included)
     Route::post('/rate', [\App\Http\Controllers\RatingController::class, 'store'])->name('rate.store');
     Route::get('/feed', [FeedController::class, 'index'])->name('feed');
-    Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks');
-    Route::post('/bookmarks', [BookmarkController::class, 'store'])->name('bookmarks.store');
-    Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy');
-    Route::get('/music', [MusicController::class, 'index'])->name('music.index');
-    Route::post('/music', [MusicController::class, 'store'])->name('music.store');
+
+    // Accessible ONLY by Contributors and Admins (Upload/Manage)
+    Route::middleware(['role:admin,contributor'])->group(function() {
+        Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks');
+        Route::post('/bookmarks', [BookmarkController::class, 'store'])->name('bookmarks.store');
+        Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy');
+        
+        Route::get('/music', [MusicController::class, 'index'])->name('music.index');
+        Route::post('/music', [MusicController::class, 'store'])->name('music.store');
+    });
 });
 
-// Admin Routes
+// --- Admin Routes ---
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
@@ -104,15 +119,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
     });
 
-    // UPDATED: Post Management Routes (Replaces Music Approval)
     Route::prefix('posts')->name('posts.')->group(function () {
         Route::get('/', [PostManagementController::class, 'index'])->name('index');
         Route::post('/music/{music}/approve', [PostManagementController::class, 'approveMusic'])->name('approve');
         Route::post('/music/{music}/reject', [PostManagementController::class, 'rejectMusic'])->name('reject');
-        // Generic delete route for any post type
         Route::delete('/{type}/{id}', [PostManagementController::class, 'destroy'])->name('destroy');
     });
     
-    // Kept for backward compatibility if needed, but redirects to posts
     Route::get('/music', function() { return redirect()->route('admin.posts.index'); })->name('music.index');
 });

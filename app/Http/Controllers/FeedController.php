@@ -13,12 +13,11 @@ class FeedController extends Controller
     public function index(Request $request)
     {
         $userId = Auth::id();
+        $search = $request->input('q'); // Get search query
 
-        // Helper to map data and include user's specific rating
+        // Helper to map data
         $mapItem = function ($item, $type) use ($userId) {
-            // Find if current user rated this item
             $userRating = $item->ratings->firstWhere('user_id', $userId);
-
             return (object) [
                 'id' => $item->id,
                 'type' => $type,
@@ -34,27 +33,41 @@ class FeedController extends Controller
                 'reviews_count' => $item->reviews_count ?? 0,
                 'views' => $item->views ?? 0,
                 'status' => $item->status ?? null,
-                'my_rating' => $userRating ? $userRating->rating : 0, // <--- Added this
+                'my_rating' => $userRating ? $userRating->rating : 0,
             ];
         };
 
-        // Eager load 'ratings' for the current user only to save performance
         $ratingQuery = function($q) use ($userId) {
             $q->where('user_id', $userId);
         };
 
-        // Fetch Bookmarks
-        $bookmarks = Bookmark::with(['user', 'ratings' => $ratingQuery])
-            ->whereNotNull('uploaded_at')
-            ->get()
-            ->map(fn($b) => $mapItem($b, 'bookmark'));
+        // --- Fetch Bookmarks ---
+        $bookmarksQuery = Bookmark::with(['user', 'ratings' => $ratingQuery])
+            ->whereNotNull('uploaded_at');
 
-        // Fetch Approved Music
-        $musics = Music::with(['user', 'ratings' => $ratingQuery])
+        if ($search) {
+            $bookmarksQuery->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('artist', 'like', "%{$search}%")
+                  ->orWhere('genre', 'like', "%{$search}%");
+            });
+        }
+
+        $bookmarks = $bookmarksQuery->get()->map(fn($b) => $mapItem($b, 'bookmark'));
+
+        // --- Fetch Approved Music ---
+        $musicQuery = Music::with(['user', 'ratings' => $ratingQuery])
             ->where('status', Music::STATUS_APPROVED)
-            ->whereNotNull('uploaded_at')
-            ->get()
-            ->map(fn($m) => $mapItem($m, 'music'));
+            ->whereNotNull('uploaded_at');
+
+        if ($search) {
+            $musicQuery->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('artist', 'like', "%{$search}%");
+            });
+        }
+
+        $musics = $musicQuery->get()->map(fn($m) => $mapItem($m, 'music'));
 
         // Merge, Sort, Paginate
         $items = $bookmarks->merge($musics)->sortByDesc(fn($item) => $item->uploaded_at ?? now())->values();
@@ -62,10 +75,10 @@ class FeedController extends Controller
         $page = max(1, (int) $request->get('page', 1));
         $perPage = 12;
         $total = $items->count();
-        $slice = $items->slice(($page - 1) * $perPage, $perPage)->values(); // use slice() on collection, not forPage()
+        $slice = $items->slice(($page - 1) * $perPage, $perPage)->values();
 
         $posts = new LengthAwarePaginator(
-            $slice, $total, $perPage, $page, ['path' => route('feed')]
+            $slice, $total, $perPage, $page, ['path' => route('feed'), 'query' => $request->query()]
         );
 
         return view('feed', ['posts' => $posts]);
