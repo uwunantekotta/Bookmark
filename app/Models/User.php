@@ -9,6 +9,11 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    // Define Role Constants for easy use and consistency
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_CONTRIBUTOR = 'contributor';
+    public const ROLE_VIEWER = 'viewer'; // The default role
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
@@ -21,6 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role', // <--- ADDED: 'role' attribute
     ];
 
     /**
@@ -44,5 +50,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Helper methods to check user roles
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isContributor(): bool
+    {
+        return $this->role === self::ROLE_CONTRIBUTOR;
+    }
+
+    public function isViewer(): bool
+    {
+        return $this->role === self::ROLE_VIEWER;
     }
 }
