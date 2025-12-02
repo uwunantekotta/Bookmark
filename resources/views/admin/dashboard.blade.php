@@ -298,14 +298,9 @@
                 <a href="{{ route('admin.users.banned') }}">View Banned</a>
             </div>
             <div class="menu-card">
-                <h2>🎵 Approve Songs</h2>
-                <p>Review and approve or reject song uploads</p>
-                <a href="{{ route('admin.music.index') }}">Approve Songs</a>
-            </div>
-            <div class="menu-card">
-                <h2>❌ Rejected Songs</h2>
-                <p>View all rejected songs and rejection reasons</p>
-                <a href="{{ route('admin.music.rejected') }}">View Rejected</a>
+                <h2>🎵 Manage Posts</h2>
+                <p>Review, approve, reject, and manage song uploads</p>
+                <a href="{{ route('admin.music.index') }}">Manage Posts</a>
             </div>
         </div>
     </div>
