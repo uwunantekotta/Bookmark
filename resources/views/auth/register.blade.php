@@ -237,6 +237,13 @@
         <label for="email">Email</label>
         <input id="email" type="email" name="email" value="{{ old('email') }}" required>
 
+        <label for="role">Role</label>
+        <select id="role" name="role" style="width:100%; padding:12px 14px; border:1px solid rgba(255,255,255,0.4); border-radius:8px; background: rgba(255,255,255,0.06); color:#fff;">
+            <option value="viewer" {{ old('role') === 'viewer' ? 'selected' : '' }}>Viewer (view only)</option>
+            <option value="contributor" {{ old('role') === 'contributor' ? 'selected' : '' }}>Contributor (upload songs)</option>
+            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin (manage users & approvals)</option>
+        </select>
+
         <label for="password">Password</label>
         <input id="password" type="password" name="password" required onInput="checkPasswordStrength()">
 
@@ -347,3 +354,6 @@ document.addEventListener('DOMContentLoaded', function() {
     checkPasswordStrength();
 });
 </script>
+
+</body>
+</html>

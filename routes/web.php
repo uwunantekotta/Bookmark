@@ -44,13 +44,16 @@ Route::post('/register', function (Request $request) {
     $data = $request->validate([
         'name' => ['required','string','max:255'],
         'email' => ['required','email','max:255','unique:users,email'],
-        'password' => ['required','confirmed','min:6'],
+        // Password must match client-side requirements: 8-64 chars, 1 uppercase, 1 number, 1 symbol
+        'password' => ['required','confirmed','min:8','max:64','regex:/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:\\|,.<>\/\?]).{8,64}$/'],
+        'role' => ['required','in:admin,contributor,viewer'],
     ]);
 
     $user = User::create([
         'name' => $data['name'],
         'email' => $data['email'],
         'password' => Hash::make($data['password']),
+        'role' => $data['role'] ?? 'viewer',
     ]);
 
     Auth::login($user);
