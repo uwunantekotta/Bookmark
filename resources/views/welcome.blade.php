@@ -41,6 +41,7 @@ nav {
     left: 0;
     display: flex;
     align-items: center;
+    justify-content: center;
     z-index: 10;
 }
 
@@ -48,6 +49,14 @@ nav {
     display: flex;
     align-items: center;
     gap: 20px; /* space between logo and links */
+}
+
+/* New class for the Brand Name */
+.brand-name {
+    font-family: 'Formula1 Display', sans-serif;
+    font-size: 22px; 
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 /* Links next to logo */
@@ -68,6 +77,7 @@ nav {
     padding: 0;
     font-size: 16px;
     transition: 0.2s;
+    white-space: nowrap;
 }
 
 .nav-links a:hover, .nav-links form button:hover {
@@ -96,6 +106,7 @@ h1 {
     font-size: 80px;
     margin-bottom: 10px;
     font-weight: 700;
+    line-height: 1.1;
 }
 
 .subtitle {
@@ -114,6 +125,34 @@ p {
     margin-right: auto;
 }
 
+/* ROLLING TEXT ANIMATION */
+.reveal-text {
+    display: inline-flex;
+    overflow: hidden;
+    vertical-align: bottom;
+    line-height: 1.2;
+}
+
+.reveal-text span {
+    display: block;
+    transform: translateY(110%);
+    animation: rollUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Animation Delay Utility */
+.delay-1 { animation-delay: 0.15s; }
+.delay-2 { animation-delay: 0.3s; }
+
+@keyframes rollUp {
+    0% {
+        transform: translateY(110%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* BUTTON STYLES & ANIMATIONS */
 a.btn, button.btn {
     text-decoration: none;
     cursor: pointer;
@@ -121,7 +160,14 @@ a.btn, button.btn {
     padding: 12px 26px;
     font-size: 16px;
     border: none;
-    transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    display: inline-block;
+}
+
+a.btn:hover, button.btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .btn-primary {
@@ -131,7 +177,7 @@ a.btn, button.btn {
 }
 
 .btn-primary:hover {
-    background: #eaeaea;
+    background: #f0f0f0;
 }
 
 .btn-ghost {
@@ -162,7 +208,8 @@ a.btn, button.btn {
         <svg class="logo-icon" viewBox="0 0 24 24" fill="white">
             <path d="M12 3c-4.97 0-9 3.582-9 8v6a3 3 0 003 3h1a2 2 0 002-2v-5a2 2 0 00-2-2H6c0-3.326 3.134-6 7-6s7 2.674 7 6h-1a2 2 0 00-2 2v5a2 2 0 002 2h1a3 3 0 003-3v-6c0-4.418-4.03-8-9-8z"/>
         </svg>
-        AUDIOBOOK
+        
+        <span class="brand-name">AUDIOBOOK</span>
 
         <div class="nav-links">
             <a href="{{ url('/welcome') }}">Home</a>
@@ -174,7 +221,6 @@ a.btn, button.btn {
                 </form>
             @else
                 <a href="{{ url('/login') }}">Add Bookmark</a>
-                <a href="{{ url('/register') }}">Register</a>
             @endauth
             <a href="{{ url('/bookmarks') }}">Bookmarks</a>
         </div>
@@ -184,8 +230,19 @@ a.btn, button.btn {
 <!-- HERO SECTION -->
 <div class="hero-wrapper">
     <div class="hero">
-        <h1>Welcome</h1>
-        <div class="subtitle">To Audiobook</div>
+        <!-- Rolling Text for H1 -->
+        <h1>
+            <span class="reveal-text">
+                <span>Welcome</span>
+            </span>
+        </h1>
+        
+        <!-- Rolling Text for Subtitle (with delay) -->
+        <div class="subtitle">
+            <span class="reveal-text">
+                <span class="delay-1">To Audiobook</span>
+            </span>
+        </div>
 
         <p>Quickly save, search and open your favorite links — stored in your account and synced across your devices when signed in.</p>
 
