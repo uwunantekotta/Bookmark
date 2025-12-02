@@ -18,7 +18,8 @@ class MusicController extends Controller
             'artist' => 'required|string|max:255',
             'url' => 'required|url',
             'title' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|image|max:2048',
+            'release_date' => 'nullable|date'
         ]);
 
         $path = null;
@@ -31,7 +32,9 @@ class MusicController extends Controller
             'artist' => $request->artist,
             'url' => $request->url,
             'image_path' => $path,
-            'user_id' => Auth::id()
+            'user_id' => Auth::id(),
+            'release_date' => $request->release_date ?? null,
+            'uploaded_at' => now()
         ]);
 
         return redirect()->back()->with('success', 'Music bookmark saved!');

@@ -337,6 +337,8 @@ input[type="text"], input[type="url"], input[type="file"] {
                 <input type="text" name="title" placeholder="Song title (optional)">
                 <input type="text" name="artist" placeholder="Artist (required)" required>
                 <input type="url" name="url" placeholder="https://open.spotify.com/track/..." required>
+                <label style="font-size:13px; opacity:0.8;">Release date (optional)</label>
+                <input type="date" name="release_date" style="width:100%; padding:12px 14px; border: 1px solid rgba(255,255,255,0.4); border-radius:8px; background: rgba(255,255,255,0.06); color:#fff; margin-bottom:8px;">
                 <label style="font-size:13px; opacity:0.8;">Attach photo (optional)</label>
                 <input type="file" name="image" accept="image/*">
 
@@ -355,7 +357,50 @@ input[type="text"], input[type="url"], input[type="file"] {
     </div>
 
     <div class="column-right">
-        @foreach ($bookmarks as $bookmark)
+
+        <div class="card" style="margin-bottom:12px;">
+            <form method="GET" action="{{ route('welcome_clean') }}" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <div style="flex:1; min-width:160px;">
+                    <input type="text" name="q" placeholder="Search artist or title" value="{{ request('q') }}" style="width:100%; padding:10px;">
+                </div>
+
+                <div style="min-width:160px;">
+                    <select name="genre" style="padding:10px; min-width:160px;">
+                        <option value="">All genres</option>
+                        @if(isset($genres))
+                            @foreach($genres as $g)
+                                <option value="{{ $g }}" {{ request('genre') == $g ? 'selected' : '' }}>{{ $g }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+
+                <div style="min-width:160px;">
+                    <select name="sort_by" style="padding:10px; min-width:160px;">
+                        <option value="artist" {{ request('sort_by')=='artist' ? 'selected' : '' }}>Artist (A–Z)</option>
+                        <option value="title" {{ request('sort_by')=='title' ? 'selected' : '' }}>Title</option>
+                        <option value="genre" {{ request('sort_by')=='genre' ? 'selected' : '' }}>Genre</option>
+                        <option value="rating_avg" {{ request('sort_by')=='rating_avg' ? 'selected' : '' }}>Rating</option>
+                        <option value="reviews_count" {{ request('sort_by')=='reviews_count' ? 'selected' : '' }}>Reviews</option>
+                        <option value="views" {{ request('sort_by')=='views' ? 'selected' : '' }}>Views</option>
+                        <option value="created_at" {{ request('sort_by')=='created_at' ? 'selected' : '' }}>Newest</option>
+                    </select>
+                </div>
+
+                <div style="min-width:120px;">
+                    <select name="order" style="padding:10px;">
+                        <option value="asc" {{ request('order')=='asc' ? 'selected' : '' }}>Ascending</option>
+                        <option value="desc" {{ request('order')=='desc' || !request('order') ? 'selected' : '' }}>Descending</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </div>
+            </form>
+        </div>
+
+        @forelse ($bookmarks as $bookmark)
             <div class="item">
                 @if($bookmark->image)
                     <img src="{{ asset('storage/' . $bookmark->image) }}">
@@ -367,10 +412,26 @@ input[type="text"], input[type="url"], input[type="file"] {
                     <a href="{{ $bookmark->url }}" target="_blank">
                         {{ $bookmark->title ?? 'Untitled Song' }}
                     </a>
-                    <div class="tags">{{ $bookmark->artist }}</div>
+                    <div class="tags">{{ $bookmark->artist }} @if($bookmark->genre) · <em>{{ $bookmark->genre }}</em>@endif</div>
+                    <div style="font-size:12px; color:#aaa; margin-top:6px;">
+                        ⭐ {{ number_format($bookmark->rating_avg,1) }} · {{ $bookmark->reviews_count }} reviews · {{ $bookmark->views }} views
+                    </div>
+
+                    <div style="font-size:12px; color:#bdbdbd; margin-top:6px;">
+                        @if($bookmark->release_date)
+                            Release: {{ $bookmark->release_date->format('M j, Y') }}
+                        @endif
+                        @if($bookmark->uploaded_at)
+                            @if($bookmark->release_date) · @endif Uploaded: {{ $bookmark->uploaded_at->format('M j, Y') }}
+                        @endif
+                    </div>
                 </div>
             </div>
-        @endforeach
+        @empty
+            <div class="card">No results found.</div>
+        @endforelse
+
+        <div style="margin-top:12px;">{{ $bookmarks->links() }}</div>
     </div>
 </main>
 

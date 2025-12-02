@@ -29,6 +29,8 @@ class User extends Authenticatable
         'role', // <--- ADDED: 'role' attribute
         'banned',
         'banned_reason',
+        'rating_avg',
+        'reviews_count',
     ];
 
     /**
@@ -51,6 +53,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'banned' => 'boolean',
+            'rating_avg' => 'float',
+            'reviews_count' => 'integer',
         ];
     }
 

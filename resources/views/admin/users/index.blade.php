@@ -195,6 +195,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th>Rating</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -237,13 +238,17 @@
                                         @endif
                                     </div>
                                 </td>
-                            </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #aaa;">No users found</td>
-                        </tr>
-                    @endforelse
-                </tbody>
+                                <td>
+                                    {{ $user->email }}</td>
+                                <td>
+                                    <span class="role-badge {{ $user->role }}">
+                                        {{ ucfirst($user->role) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="font-weight:700;">⭐ {{ number_format($user->rating_avg ?? 0, 1) }}</div>
+                                    <div style="font-size:12px; color:#aaa;">{{ $user->reviews_count ?? 0 }} reviews</div>
+                                </td>
             </table>
         </div>
 

@@ -24,7 +24,14 @@ class Music extends Model
         'image_path',
         'user_id',
         'status',
-        'rejection_reason'
+        'rejection_reason',
+        'release_date',
+        'uploaded_at'
+    ];
+
+    protected $casts = [
+        'release_date' => 'date',
+        'uploaded_at' => 'datetime',
     ];
 
     /**

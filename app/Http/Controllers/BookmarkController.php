@@ -19,14 +19,43 @@ class BookmarkController extends Controller
         return view('bookmarks', compact('bookmarks'));
     }
 
-    // Show bookmarks on welcome_clean page (RIGHT COLUMN)
-    public function showWelcome()
+    // Show bookmarks on welcome_clean page (RIGHT COLUMN) with sorting/filtering
+    public function showWelcome(Request $request)
     {
-        $bookmarks = Bookmark::where('user_id', Auth::id())
-            ->latest()
-            ->get();
+        $query = Bookmark::query();
 
-        return view('welcome_clean', compact('bookmarks'));
+        // Optionally filter by genre
+        if ($request->filled('genre')) {
+            $query->where('genre', 'like', '%' . $request->genre . '%');
+        }
+
+        // Optionally search by artist/title
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function($sub) use ($q) {
+                $sub->where('artist', 'like', "%{$q}%")
+                    ->orWhere('title', 'like', "%{$q}%");
+            });
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $order = $request->get('order', 'desc');
+
+        // Allow only specific sortable columns
+        $allowedSorts = ['artist','title','genre','rating_avg','reviews_count','views','created_at'];
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+
+        $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        $bookmarks = $query->orderBy($sortBy, $order)->paginate(20)->withQueryString();
+
+        // Provide distinct genres for filter dropdown
+        $genres = Bookmark::select('genre')->whereNotNull('genre')->distinct()->pluck('genre');
+
+        return view('welcome_clean', compact('bookmarks', 'genres'));
     }
 
     // Save bookmark
@@ -36,7 +65,8 @@ class BookmarkController extends Controller
             'title' => 'nullable|string',
             'artist' => 'required|string',
             'url' => 'required|url',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|image|max:2048',
+            'release_date' => 'nullable|date'
         ]);
 
         $data['user_id'] = Auth::id();
@@ -45,6 +75,9 @@ class BookmarkController extends Controller
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('bookmarks', 'public');
         }
+
+        // Set uploaded_at to now
+        $data['uploaded_at'] = now();
 
         Bookmark::create($data);
 
