@@ -79,6 +79,25 @@
         transition: 0.2s;
     }
 
+    /* Role select styling */
+    .role-select {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.12);
+        color: #000;
+        font-size: 15px;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    /* Try to ensure option readability in dropdowns */
+    .role-select option {
+        background: #fff;
+        color: #000;
+    }
+
     input[type="text"]:focus,
     input[type="email"]:focus,
     input[type="password"]:focus {
