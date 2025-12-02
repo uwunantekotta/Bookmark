@@ -9,18 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('bookmarks', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('user_id')->constrained()->onDelete('cascade');
-    $table->string('title')->nullable();
-    $table->string('url');
-    $table->json('tags')->nullable(); // store artist name
-    $table->string('image')->nullable();
-    $table->timestamps();
-});
-    }
+   public function up(): void
+{
+    Schema::create('bookmarks', function (Blueprint $table) {
+        $table->id();
+        $table->string('title')->nullable();
+        $table->string('artist')->nullable(); // Ensure this is here
+        $table->string('genre')->nullable();  // Ensure this is here
+        $table->string('url');
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
