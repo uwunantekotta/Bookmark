@@ -14,16 +14,100 @@
 :root {
     font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     color: #fff;
+    /* Initialize CSS variables for mouse interaction */
+    --move-x: 0px;
+    --move-y: 0px;
 }
 
 body {
     margin: 0;
     min-height: 100vh;
-    background: linear-gradient(135deg, #0a4bff 0%, #0080ff 60%, #00a4ff 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow-x: hidden;
+    position: relative;
+}
+
+/* Background Color Layers */
+.bg-layer {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.bg-blue {
+    background: linear-gradient(135deg, #0a4bff 0%, #0080ff 60%, #00a4ff 100%);
+    z-index: -10;
+}
+
+.bg-gray {
+    background: linear-gradient(135deg, #2b2b2b 0%, #3a3a3a 60%, #4f4f4f 100%);
+    z-index: -9;
+    opacity: 0;
+    animation: fadeCycle 15s infinite ease-in-out;
+}
+
+@keyframes fadeCycle {
+    0%, 40% { opacity: 0; }
+    50%, 90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: -5%;
+    width: 110%;
+    height: 110%;
+    z-index: -4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 800'%3E%3Cpath fill='%23ffffff' fill-opacity='0.05' d='M0,256L48,261.3C96,267,192,277,288,293.3C384,309,480,331,576,314.7C672,299,768,245,864,245.3C960,245,1056,299,1152,298.7C1248,299,1344,245,1392,218.7L1440,192L1440,800L1392,800C1344,800,1248,800,1152,800C1056,800,960,800,864,800C768,800,672,800,576,800C480,800,384,800,288,800C192,800,96,800,48,800L0,800Z'%3E%3C/path%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,416L48,421.3C96,427,192,437,288,421.3C384,405,480,363,576,362.7C672,363,768,405,864,432C960,459,1056,469,1152,448C1248,427,1344,373,1392,346.7L1440,320L1440,800L1392,800C1344,800,1248,800,1152,800C1056,800,960,800,864,800C768,800,672,800,576,800C480,800,384,800,288,800C192,800,96,800,48,800L0,800Z'%3E%3C/path%3E%3Cpath fill='%23ffffff' fill-opacity='0.15' d='M0,576L48,586.7C96,597,192,619,288,602.7C384,587,480,533,576,512C672,491,768,501,864,528C960,555,1056,597,1152,597.3C1248,597,1344,555,1392,533.3L1440,512L1440,800L1392,800C1344,800,1248,800,1152,800C1056,800,960,800,864,800C768,800,672,800,576,800C480,800,384,800,288,800C192,800,96,800,48,800L0,800Z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+    background-position: center bottom;
+    opacity: 0.4;
+    pointer-events: none;
+    
+    /* Interactive transform */
+    transform: translate(var(--move-x), var(--move-y));
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* WAVE ANIMATIONS */
+.waves-container {
+    position: fixed;
+    left: -10%;
+    width: 120%;
+    height: 50vh;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.waves-bottom { bottom: -100px; }
+.waves-top { top: -100px; transform: rotate(180deg); }
+
+.waves {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin-bottom: -7px;
+    min-height: 100px;
+    transform: translate3d(var(--move-x), var(--move-y), 0);
+    transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.parallax > use {
+    animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite;
+}
+.parallax > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; fill: rgba(255, 255, 255, 0.05); }
+.parallax > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; fill: rgba(255, 255, 255, 0.1); }
+.parallax > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; fill: rgba(255, 255, 255, 0.15); }
+.parallax > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; fill: rgba(255, 255, 255, 0.2); }
+
+@keyframes move-forever {
+    0% { transform: translate3d(-90px, 0, 0); }
+    100% { transform: translate3d(85px, 0, 0); }
 }
 
 header {
@@ -55,19 +139,49 @@ nav a:hover {
     color: #00f0ff;
 }
 
+/* Styles specifically for the Auth/Admin section */
+.auth-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-info {
+    text-align: right;
+    font-size: 13px;
+    line-height: 1.2;
+}
+
 .logout-btn {
     padding: 8px 12px;
-    margin-left: 8px;
     border-radius: 50px;
     border: 1px solid rgba(255,255,255,0.6);
     background: rgba(255,255,255,0.1);
     color: #fff;
     cursor: pointer;
     transition: 0.2s;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .logout-btn:hover {
     background: rgba(255,255,255,0.2);
+}
+
+.admin-btn {
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: none;
+    background: #ffaa00; /* Orange color from your screenshot */
+    color: #000;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.admin-btn:hover {
+    background: #ffc144;
 }
 
 main {
@@ -78,6 +192,7 @@ main {
     display: flex;
     gap: 24px;
     padding: 0 18px;
+    z-index: 1;
 }
 
 .column-left { flex: 1; }
@@ -167,26 +282,43 @@ input[type="text"], input[type="url"], input[type="file"] {
 
 <body>
 
+<div class="bg-layer bg-blue"></div>
+<div class="bg-layer bg-gray"></div>
+
+<div class="waves-container waves-top">
+    <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+    <defs><path id="gentle-wave-top" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" /></defs>
+    <g class="parallax">
+    <use xlink:href="#gentle-wave-top" x="48" y="0" />
+    <use xlink:href="#gentle-wave-top" x="48" y="3" />
+    <use xlink:href="#gentle-wave-top" x="48" y="5" />
+    <use xlink:href="#gentle-wave-top" x="48" y="7" />
+    </g>
+    </svg>
+</div>
+
 <header>
-    <!-- Logo -->
     <h1>
         <a href="{{ route('welcome') }}" style="color:white;text-decoration:none;">Audiobook</a>
     </h1>
 
-    <!-- Navigation -->
     <nav>
         <a href="{{ route('welcome') }}">Home</a>
         <a href="{{ route('bookmarks') }}">Add Bookmark</a>
         <a href="{{ route('bookmarks') }}">Bookmarks</a>
     </nav>
 
-    <!-- Auth -->
-    <div style="display:flex;align-items:center;">
+    <div class="auth-controls">
         @auth
-            <div style="text-align:right;font-size:13px;">
+            @if(Auth::user()->isAdmin())
+                <a href="{{ route('admin.dashboard') }}" class="admin-btn">Admin Dashboard</a>
+            @endif
+
+            <div class="user-info">
                 Signed in as<br><strong>{{ Auth::user()->name }}</strong>
             </div>
-            <form method="POST" action="{{ url('/logout') }}">
+            
+            <form method="POST" action="{{ url('/logout') }}" style="margin:0;">
                 @csrf
                 <button type="submit" class="logout-btn">Logout</button>
             </form>
@@ -195,7 +327,6 @@ input[type="text"], input[type="url"], input[type="file"] {
 </header>
 
 <main>
-    <!-- LEFT COLUMN — ADD BOOKMARK -->
     <div class="column-left">
         <div class="card">
             <h2>Add Music Bookmark</h2>
@@ -223,11 +354,9 @@ input[type="text"], input[type="url"], input[type="file"] {
         </div>
     </div>
 
-    <!-- RIGHT COLUMN — SHOW SAVED BOOKMARKS -->
     <div class="column-right">
         @foreach ($bookmarks as $bookmark)
             <div class="item">
-                <!-- Image -->
                 @if($bookmark->image)
                     <img src="{{ asset('storage/' . $bookmark->image) }}">
                 @else
@@ -244,6 +373,28 @@ input[type="text"], input[type="url"], input[type="file"] {
         @endforeach
     </div>
 </main>
+
+<div class="waves-container waves-bottom">
+    <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+    <defs><path id="gentle-wave-bottom" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" /></defs>
+    <g class="parallax">
+    <use xlink:href="#gentle-wave-bottom" x="48" y="0" />
+    <use xlink:href="#gentle-wave-bottom" x="48" y="3" />
+    <use xlink:href="#gentle-wave-bottom" x="48" y="5" />
+    <use xlink:href="#gentle-wave-bottom" x="48" y="7" />
+    </g>
+    </svg>
+</div>
+
+<script>
+    document.addEventListener('mousemove', (e) => {
+        const { clientX, clientY } = e;
+        const x = (window.innerWidth / 2 - clientX) / 50;
+        const y = (window.innerHeight / 2 - clientY) / 50;
+        document.documentElement.style.setProperty('--move-x', `${x}px`);
+        document.documentElement.style.setProperty('--move-y', `${y}px`);
+    });
+</script>
 
 </body>
 </html>
