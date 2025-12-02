@@ -5,7 +5,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\AdminController;
@@ -13,34 +12,35 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\MusicApprovalController;
 use App\Http\Controllers\FeedController;
 
-
 // ------------------------
 // Public Routes
 // ------------------------
 
-Route::get('/welcome', function () {
+Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-// MOVED: Public access to the bookmarks list
+Route::get('/welcome', function () {
+    return view('welcome');
+});
+
+// PUBLIC: Everyone can see the list
 Route::get('/welcome_clean', [BookmarkController::class, 'showWelcome'])
     ->name('welcome_clean');
 
 // ------------------------
-// Registration
+// Authentication
 // ------------------------
 
 Route::get('/register', function () {
-    if (Auth::check()) return redirect('/');
+    if (Auth::check()) return redirect('/welcome_clean');
     return view('auth.register');
 })->name('register');
 
 Route::post('/register', function (Request $request) {
-
     $data = $request->validate([
         'name' => ['required','string','max:255'],
         'email' => ['required','email','max:255','unique:users,email'],
-        // Password must match client-side requirements: 8-64 chars, 1 uppercase, 1 number, 1 symbol
         'password' => ['required','confirmed','min:8','max:64','regex:/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:\\|,.<>\/\?]).{8,64}$/'],
         'role' => ['required','in:admin,contributor,viewer'],
     ]);
@@ -54,14 +54,8 @@ Route::post('/register', function (Request $request) {
 
     Auth::login($user);
     $request->session()->regenerate();
-
     return redirect('/welcome_clean');
 });
-
-
-// ------------------------
-// Login
-// ------------------------
 
 Route::get('/login', function () {
     if (Auth::check()) return redirect('/welcome_clean');
@@ -69,15 +63,12 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::post('/login', function (Request $request) {
-
     $credentials = $request->validate([
         'email' => ['required','email'],
         'password' => ['required'],
     ]);
 
-    $remember = $request->boolean('remember');
-
-    if (Auth::attempt($credentials, $remember)) {
+    if (Auth::attempt($credentials, $request->boolean('remember'))) {
         $request->session()->regenerate();
         return redirect()->intended('/welcome_clean');
     }
@@ -87,11 +78,6 @@ Route::post('/login', function (Request $request) {
     ])->onlyInput('email');
 });
 
-
-// ------------------------
-// Logout
-// ------------------------
-
 Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
@@ -99,35 +85,32 @@ Route::post('/logout', function (Request $request) {
     return redirect()->route('welcome');
 })->name('logout');
 
-
 // ------------------------
 // Authenticated Routes
 // ------------------------
 
 Route::middleware('auth')->group(function () {
-    // Unified Feed
+    
+    // Feed
     Route::get('/feed', [FeedController::class, 'index'])->name('feed');
 
-    // Bookmarks (CRUD)
+    // Bookmarks (CRUD) - Note the explicit naming for the store route
     Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks');
-    Route::post('/bookmarks', [BookmarkController::class, 'store']);
-    Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy']);
+    Route::post('/bookmarks', [BookmarkController::class, 'store'])->name('bookmarks.store');
+    Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy');
 
     // Music Upload
     Route::get('/music', [MusicController::class, 'index'])->name('music.index');
     Route::post('/music', [MusicController::class, 'store'])->name('music.store');
 });
 
-
 // ------------------------
 // Admin Routes
 // ------------------------
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Admin Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-    // User Management
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserManagementController::class, 'index'])->name('index');
         Route::get('/banned', [UserManagementController::class, 'banned'])->name('banned');
@@ -138,7 +121,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
     });
 
-    // Music Approval
     Route::prefix('music')->name('music.')->group(function () {
         Route::get('/', [MusicApprovalController::class, 'index'])->name('index');
         Route::post('/{music}/approve', [MusicApprovalController::class, 'approve'])->name('approve');

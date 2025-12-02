@@ -10,7 +10,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Bookmark extends Model
 {
     protected $fillable = [
-        'user_id', 'title', 'artist', 'url', 'image', 'genre', 'views', 'rating_avg', 'reviews_count'
+        'user_id', 
+        'title', 
+        'artist', 
+        'url', 
+        'image', 
+        'genre', 
+        'views', 
+        'rating_avg', 
+        'reviews_count',
+        // ADD THESE TWO:
+        'release_date',
+        'uploaded_at'
     ];
 
     protected $casts = [
@@ -21,12 +32,8 @@ class Bookmark extends Model
         'views' => 'integer',
     ];
 
-    /**
-     * The user who added the bookmark.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 }
-
