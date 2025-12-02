@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Add the 'role' column as a string, after 'password', with a default value of 'viewer'
-            $$table->string('role')->default('viewer')->after('password');
+            $table->string('role')->default('viewer')->after('password');
         });
     }
 

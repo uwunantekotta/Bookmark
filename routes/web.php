@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Hash;
 
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\MusicController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\MusicApprovalController;
 
 
 // ------------------------
@@ -116,4 +119,30 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/music', [MusicController::class, 'index'])->name('music.index');
     Route::post('/music', [MusicController::class, 'store'])->name('music.store');
+});
+
+
+// ------------------------
+// Admin Routes
+// ------------------------
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Admin Dashboard
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // User Management
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserManagementController::class, 'index'])->name('index');
+        Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('edit');
+        Route::put('/{user}/role', [UserManagementController::class, 'updateRole'])->name('updateRole');
+        Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
+    });
+
+    // Music Approval
+    Route::prefix('music')->name('music.')->group(function () {
+        Route::get('/', [MusicApprovalController::class, 'index'])->name('index');
+        Route::post('/{music}/approve', [MusicApprovalController::class, 'approve'])->name('approve');
+        Route::post('/{music}/reject', [MusicApprovalController::class, 'reject'])->name('reject');
+        Route::get('/rejected', [MusicApprovalController::class, 'rejectedList'])->name('rejected');
+    });
 });
