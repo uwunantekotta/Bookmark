@@ -129,6 +129,95 @@
         color: #ffdddd;
         border-radius: 4px;
     }
+
+    .password-strength-container {
+        margin-top: 8px;
+        margin-bottom: 12px;
+    }
+
+    .strength-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .strength-bar-fill {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease, background-color 0.3s ease;
+        border-radius: 3px;
+    }
+
+    .strength-bar-fill.weak {
+        background: #ff4444;
+        width: 33%;
+    }
+
+    .strength-bar-fill.fair {
+        background: #ffaa00;
+        width: 66%;
+    }
+
+    .strength-bar-fill.strong {
+        background: #44dd44;
+        width: 100%;
+    }
+
+    .strength-requirements {
+        font-size: 12px;
+        color: #ccc;
+    }
+
+    .requirement {
+        display: flex;
+        align-items: center;
+        margin: 4px 0;
+        gap: 6px;
+    }
+
+    .requirement-icon {
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: bold;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+    }
+
+    .requirement.met .requirement-icon {
+        background: #44dd44;
+        color: #000;
+    }
+
+    .requirement-text {
+        flex: 1;
+    }
+
+    .strength-label {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #aaa;
+    }
+
+    .strength-label.weak {
+        color: #ff4444;
+    }
+
+    .strength-label.fair {
+        color: #ffaa00;
+    }
+
+    .strength-label.strong {
+        color: #44dd44;
+    }
 </style>
 </head>
 <body>
@@ -149,7 +238,32 @@
         <input id="email" type="email" name="email" value="{{ old('email') }}" required>
 
         <label for="password">Password</label>
-        <input id="password" type="password" name="password" required>
+        <input id="password" type="password" name="password" required onInput="checkPasswordStrength()">
+
+        <div class="password-strength-container">
+            <div class="strength-bar">
+                <div id="strengthBarFill" class="strength-bar-fill"></div>
+            </div>
+            <div class="strength-label" id="strengthLabel"></div>
+            <div class="strength-requirements">
+                <div class="requirement" id="req-length">
+                    <div class="requirement-icon">✓</div>
+                    <div class="requirement-text">8-64 characters</div>
+                </div>
+                <div class="requirement" id="req-uppercase">
+                    <div class="requirement-icon">✓</div>
+                    <div class="requirement-text">At least 1 capital letter (A-Z)</div>
+                </div>
+                <div class="requirement" id="req-number">
+                    <div class="requirement-icon">✓</div>
+                    <div class="requirement-text">At least 1 number (0-9)</div>
+                </div>
+                <div class="requirement" id="req-symbol">
+                    <div class="requirement-icon">✓</div>
+                    <div class="requirement-text">At least 1 symbol (!@#$%^&*)</div>
+                </div>
+            </div>
+        </div>
 
         <label for="password_confirmation">Confirm password</label>
         <input id="password_confirmation" type="password" name="password_confirmation" required>
@@ -162,5 +276,74 @@
     </div>
 </main>
 
-</body>
-</html>
+<script>
+function checkPasswordStrength() {
+    const password = document.getElementById('password').value;
+    
+    // Check requirements
+    const lengthMet = password.length >= 8 && password.length <= 64;
+    const uppercaseMet = /[A-Z]/.test(password);
+    const numberMet = /[0-9]/.test(password);
+    const symbolMet = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    // Update requirement elements
+    updateRequirement('req-length', lengthMet);
+    updateRequirement('req-uppercase', uppercaseMet);
+    updateRequirement('req-number', numberMet);
+    updateRequirement('req-symbol', symbolMet);
+    
+    // Calculate strength
+    let metCount = [lengthMet, uppercaseMet, numberMet, symbolMet].filter(Boolean).length;
+    let strength = 'none';
+    
+    if (password.length === 0) {
+        strength = 'none';
+    } else if (metCount <= 1) {
+        strength = 'weak';
+    } else if (metCount <= 2) {
+        strength = 'fair';
+    } else if (metCount === 3) {
+        strength = 'fair';
+    } else {
+        strength = 'strong';
+    }
+    
+    // Update bar and label
+    const bar = document.getElementById('strengthBarFill');
+    const label = document.getElementById('strengthLabel');
+    
+    bar.className = 'strength-bar-fill';
+    label.className = 'strength-label';
+    
+    if (password.length === 0) {
+        bar.className = 'strength-bar-fill';
+        label.textContent = '';
+    } else if (strength === 'weak') {
+        bar.classList.add('weak');
+        label.classList.add('weak');
+        label.textContent = 'Weak password';
+    } else if (strength === 'fair') {
+        bar.classList.add('fair');
+        label.classList.add('fair');
+        label.textContent = 'Fair password';
+    } else if (strength === 'strong') {
+        bar.classList.add('strong');
+        label.classList.add('strong');
+        label.textContent = 'Strong password';
+    }
+}
+
+function updateRequirement(elementId, isMet) {
+    const element = document.getElementById(elementId);
+    if (isMet) {
+        element.classList.add('met');
+    } else {
+        element.classList.remove('met');
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkPasswordStrength();
+});
+</script>
