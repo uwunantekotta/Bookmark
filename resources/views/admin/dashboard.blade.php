@@ -188,6 +188,11 @@
                 <a href="{{ route('admin.users.index') }}">Manage Users</a>
             </div>
             <div class="menu-card">
+                <h2>🚫 Banned Users</h2>
+                <p>View and unban or delete banned accounts</p>
+                <a href="{{ route('admin.users.banned') }}">View Banned</a>
+            </div>
+            <div class="menu-card">
                 <h2>🎵 Approve Songs</h2>
                 <p>Review and approve or reject song uploads</p>
                 <a href="{{ route('admin.music.index') }}">Approve Songs</a>

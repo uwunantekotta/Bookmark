@@ -102,4 +102,13 @@ class UserManagementController extends Controller
 
         return back()->with('success', 'User deleted successfully');
     }
+
+    /**
+     * Show banned users
+     */
+    public function banned()
+    {
+        $users = User::where('banned', true)->paginate(15);
+        return view('admin.users.banned', compact('users'));
+    }
 }

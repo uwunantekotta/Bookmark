@@ -136,6 +136,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // User Management
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserManagementController::class, 'index'])->name('index');
+        Route::get('/banned', [UserManagementController::class, 'banned'])->name('banned');
         Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('edit');
         Route::put('/{user}/role', [UserManagementController::class, 'updateRole'])->name('updateRole');
         Route::post('/{user}/ban', [UserManagementController::class, 'ban'])->name('ban');
