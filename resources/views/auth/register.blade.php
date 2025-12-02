@@ -86,7 +86,8 @@
         border: 1px solid rgba(255,255,255,0.4);
         border-radius: 8px;
         background: rgba(255,255,255,0.12);
-        color: #000;
+        background-color: #ffffff;
+        color: #000 !important;
         font-size: 15px;
         outline: none;
         transition: 0.2s;
@@ -257,11 +258,14 @@
         <input id="email" type="email" name="email" value="{{ old('email') }}" required>
 
         <label for="role">Role</label>
-        <select id="role" name="role" style="width:100%; padding:12px 14px; border:1px solid rgba(255,255,255,0.4); border-radius:8px; background: rgba(255,255,255,0.06); color:#fff;">
+        <select id="role" name="role" class="role-select">
             <option value="viewer" {{ old('role') === 'viewer' ? 'selected' : '' }}>Viewer (view only)</option>
             <option value="contributor" {{ old('role') === 'contributor' ? 'selected' : '' }}>Contributor (upload songs)</option>
             <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin (manage users & approvals)</option>
         </select>
+        <div id="roleDisplay" style="margin-top:6px;">
+            <small style="color:#fff">Selected role: <span id="roleChoice">{{ old('role') ? ucfirst(old('role')) : 'Viewer' }}</span></small>
+        </div>
 
         <label for="password">Password</label>
         <input id="password" type="password" name="password" required onInput="checkPasswordStrength()">
@@ -371,6 +375,15 @@ function updateRequirement(elementId, isMet) {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     checkPasswordStrength();
+    // Update visible role label
+    const roleSelect = document.getElementById('role');
+    const roleChoice = document.getElementById('roleChoice');
+    if (roleSelect && roleChoice) {
+        roleChoice.textContent = roleSelect.options[roleSelect.selectedIndex].text;
+        roleSelect.addEventListener('change', function() {
+            roleChoice.textContent = this.options[this.selectedIndex].text;
+        });
+    }
 });
 </script>
 
