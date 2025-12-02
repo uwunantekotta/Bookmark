@@ -81,6 +81,7 @@ Route::post('/logout', function (Request $request) {
 
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
+    Route::post('/rate', [\App\Http\Controllers\RatingController::class, 'store'])->name('rate.store');
     Route::get('/feed', [FeedController::class, 'index'])->name('feed');
     Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks');
     Route::post('/bookmarks', [BookmarkController::class, 'store'])->name('bookmarks.store');

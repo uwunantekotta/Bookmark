@@ -6,78 +6,68 @@ use Illuminate\Http\Request;
 use App\Models\Bookmark;
 use App\Models\Music;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class FeedController extends Controller
 {
-    /**
-     * Display a unified feed of bookmarks and music.
-     */
     public function index(Request $request)
     {
-        // Get recent bookmarks and music, eager-load uploader
-        $bookmarks = Bookmark::with('user')
+        $userId = Auth::id();
+
+        // Helper to map data and include user's specific rating
+        $mapItem = function ($item, $type) use ($userId) {
+            // Find if current user rated this item
+            $userRating = $item->ratings->firstWhere('user_id', $userId);
+
+            return (object) [
+                'id' => $item->id,
+                'type' => $type,
+                'title' => $item->title,
+                'artist' => $item->artist,
+                'url' => $item->url,
+                'image' => $type === 'music' ? $item->image_path : $item->image,
+                'user' => $item->user,
+                'uploaded_at' => $item->uploaded_at,
+                'release_date' => $item->release_date,
+                'genre' => $item->genre ?? null,
+                'rating_avg' => $item->rating_avg ?? 0,
+                'reviews_count' => $item->reviews_count ?? 0,
+                'views' => $item->views ?? 0,
+                'status' => $item->status ?? null,
+                'my_rating' => $userRating ? $userRating->rating : 0, // <--- Added this
+            ];
+        };
+
+        // Eager load 'ratings' for the current user only to save performance
+        $ratingQuery = function($q) use ($userId) {
+            $q->where('user_id', $userId);
+        };
+
+        // Fetch Bookmarks
+        $bookmarks = Bookmark::with(['user', 'ratings' => $ratingQuery])
             ->whereNotNull('uploaded_at')
             ->get()
-            ->map(function ($b) {
-                return (object) [
-                    'id' => $b->id,
-                    'type' => 'bookmark',
-                    'title' => $b->title,
-                    'artist' => $b->artist,
-                    'url' => $b->url,
-                    'image' => $b->image,
-                    'user' => $b->user,
-                    'uploaded_at' => $b->uploaded_at,
-                    'release_date' => $b->release_date ?? null,
-                    'genre' => $b->genre ?? null,
-                    'rating_avg' => $b->rating_avg ?? 0,
-                    'reviews_count' => $b->reviews_count ?? 0,
-                    'views' => $b->views ?? 0,
-                ];
-            });
+            ->map(fn($b) => $mapItem($b, 'bookmark'));
 
-        $musics = Music::with('user')
+        // Fetch Approved Music
+        $musics = Music::with(['user', 'ratings' => $ratingQuery])
+            ->where('status', Music::STATUS_APPROVED)
             ->whereNotNull('uploaded_at')
             ->get()
-            ->map(function ($m) {
-                return (object) [
-                    'id' => $m->id,
-                    'type' => 'music',
-                    'title' => $m->title,
-                    'artist' => $m->artist,
-                    'url' => $m->url,
-                    'image' => $m->image_path,
-                    'user' => $m->user,
-                    'uploaded_at' => $m->uploaded_at,
-                    'release_date' => $m->release_date ?? null,
-                    'genre' => null,
-                    'rating_avg' => null,
-                    'reviews_count' => null,
-                    'views' => null,
-                    'status' => $m->status ?? null,
-                ];
-            });
+            ->map(fn($m) => $mapItem($m, 'music'));
 
-        // Merge and sort by uploaded_at descending
-        $items = $bookmarks->merge($musics)->sortByDesc(function ($item) {
-            return $item->uploaded_at ?? now();
-        })->values();
+        // Merge, Sort, Paginate
+        $items = $bookmarks->merge($musics)->sortByDesc(fn($item) => $item->uploaded_at ?? now())->values();
 
-        // Simple manual pagination
         $page = max(1, (int) $request->get('page', 1));
         $perPage = 12;
         $total = $items->count();
-        $slice = $items->forPage($page, $perPage);
+        $slice = $items->slice(($page - 1) * $perPage, $perPage)->values(); // use slice() on collection, not forPage()
 
-        $paginator = new LengthAwarePaginator(
-            $slice->all(),
-            $total,
-            $perPage,
-            $page,
-            ['path' => route('feed')]
+        $posts = new LengthAwarePaginator(
+            $slice, $total, $perPage, $page, ['path' => route('feed')]
         );
 
-        return view('feed', ['posts' => $paginator]);
+        return view('feed', ['posts' => $posts]);
     }
 }

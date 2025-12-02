@@ -41,6 +41,7 @@ class BookmarkController extends Controller
 
         // 4. Sorting
         $sortBy = $request->get('sort_by', 'created_at');
+        // Whitelist allowed columns to prevent SQL errors
         $allowedSorts = ['artist','title','genre','rating_avg','reviews_count','views','created_at'];
         if (!in_array($sortBy, $allowedSorts)) $sortBy = 'created_at';
         
@@ -48,6 +49,8 @@ class BookmarkController extends Controller
         $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
         $bookmarks = $query->orderBy($sortBy, $order)->paginate(20)->withQueryString();
+        
+        // Populate the genre dropdown
         $genres = Bookmark::select('genre')->whereNotNull('genre')->distinct()->pluck('genre');
 
         return view('welcome_clean', compact('bookmarks', 'genres'));
@@ -57,8 +60,9 @@ class BookmarkController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title' => 'nullable|string',
-            'artist' => 'required|string',
+            'title' => 'nullable|string|max:255',
+            'artist' => 'required|string|max:255',
+            'genre' => 'nullable|string|max:255', // Added genre validation
             'url' => 'required|url',
             'image' => 'nullable|image|max:2048',
             'release_date' => 'nullable|date'
@@ -73,7 +77,6 @@ class BookmarkController extends Controller
 
         Bookmark::create($data);
 
-        // --- CRITICAL FIX ---
         // Force redirect to the "welcome_clean" route
         return redirect()->route('welcome_clean')->with('success', 'Bookmark saved!');
     }

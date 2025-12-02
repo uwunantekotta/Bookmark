@@ -20,11 +20,21 @@
         .role-badge.admin { background:#ffdddd; color:#c00; }
         .role-badge.contributor { background:#fff4dd; color:#b25a00; }
         .role-badge.viewer { background:#ddffea; color:#007a3d; }
-        .actions { margin-top:8px; }
-        .btn { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
+        .actions { margin-top:8px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .btn { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; text-decoration: none; font-size: 13px; }
         .btn-ghost { background: rgba(255,255,255,0.06); color:#fff; }
         .btn-approve { background:#2ecc71; color:#042; }
         .btn-reject { background:#e74c3c; color:#fff; }
+
+        /* STAR RATING CSS */
+        .star-group { display: inline-flex; flex-direction: row; }
+        .star-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: #444; padding: 0 1px; transition: color 0.2s; }
+        .star-btn:hover, .star-btn:hover ~ .star-btn { color: #444; } /* Reset */
+        .star-group:hover .star-btn { color: #00f0ff; } /* Highlight all on hover */
+        .star-btn:hover ~ .star-btn { color: #444; } /* Grey out stars after cursor */
+        .star-btn.active { color: #ffaa00; } /* Gold for active rating */
+        .rating-wrapper { text-align: right; }
+        .rating-stats { font-size: 11px; color: #888; margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -54,40 +64,61 @@
                         </div>
 
                         @if($post->image)
-                            <img class="media" src="{{ $post->type === 'bookmark' ? asset('storage/' . $post->image) : asset('storage/' . $post->image) }}" alt="media">
+                            <img class="media" src="{{ asset('storage/' . $post->image) }}" alt="media">
                         @else
-                            <img class="media" src="https://via.placeholder.com/92" alt="media">
+                            <img class="media" src="https://via.placeholder.com/92?text=Audio" alt="media">
                         @endif
                     </div>
 
                     <div class="meta" style="margin-top:8px;">
                         @if($post->artist) {{ $post->artist }} · @endif
                         @if($post->genre) <em>{{ $post->genre }}</em> · @endif
-                        Uploaded: {{ $post->uploaded_at ? 
-                            \Carbon\Carbon::parse($post->uploaded_at)->format('M j, Y g:ia') : 'Unknown' }}
-                        @if($post->release_date)
-                            · Release: {{ \Carbon\Carbon::parse($post->release_date)->format('M j, Y') }}
-                        @endif
+                        Uploaded: {{ $post->uploaded_at ? \Carbon\Carbon::parse($post->uploaded_at)->format('M j, Y') : 'Unknown' }}
                     </div>
 
                     <div class="actions">
-                        <a class="btn btn-ghost" href="{{ $post->url }}" target="_blank">Open</a>
+                        <div>
+                            <a class="btn btn-ghost" href="{{ $post->url }}" target="_blank">Open</a>
 
-                        @auth
-                            @if(auth()->user()->isAdmin() && $post->type === 'music' && isset($post->status) && $post->status === 'pending')
-                                <form method="POST" action="{{ route('admin.music.approve', $post->id) }}" style="display:inline">@csrf
-                                    <button class="btn btn-approve" type="submit">Approve</button>
+                            @auth
+                                @if(auth()->user()->isAdmin() && $post->type === 'music' && isset($post->status) && $post->status === 'pending')
+                                    <form method="POST" action="{{ route('admin.music.approve', $post->id) }}" style="display:inline">@csrf
+                                        <button class="btn btn-approve" type="submit">Approve</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.music.reject', $post->id) }}" style="display:inline; margin-left:8px;">@csrf
+                                        <button class="btn btn-reject" type="submit">Reject</button>
+                                    </form>
+                                @endif
+                            @endauth
+                        </div>
+
+                        <div class="rating-wrapper">
+                            <div class="rating-stats">
+                                Avg: {{ number_format($post->rating_avg, 1) }} ({{ $post->reviews_count }} reviews)
+                            </div>
+                            
+                            @auth
+                                <form action="{{ route('rate.store') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="type" value="{{ $post->type }}">
+                                    <input type="hidden" name="id" value="{{ $post->id }}">
+                                    
+                                    <div class="star-group">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <button type="submit" name="rating" value="{{ $i }}" 
+                                                class="star-btn {{ $i <= $post->my_rating ? 'active' : '' }}">★</button>
+                                        @endfor
+                                    </div>
                                 </form>
-                                <form method="POST" action="{{ route('admin.music.reject', $post->id) }}" style="display:inline; margin-left:8px;">@csrf
-                                    <button class="btn btn-reject" type="submit">Reject</button>
-                                </form>
-                            @endif
-                        @endauth
+                            @else
+                                <div style="font-size:14px; color:#444;">★ ★ ★ ★ ★</div>
+                            @endauth
+                        </div>
                     </div>
                 </div>
             </div>
         @empty
-            <div style="padding:20px; background:rgba(255,255,255,0.03); border-radius:8px;">No posts yet.</div>
+            <div style="padding:20px; background:rgba(255,255,255,0.03); border-radius:8px; text-align:center; color:#aaa;">No posts available in the feed.</div>
         @endforelse
 
         <div style="margin-top:12px;">{{ $posts->links() }}</div>

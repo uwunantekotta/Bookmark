@@ -6,6 +6,7 @@
 <title>Audiobook — Bookmarks</title>
 <link href="https://fonts.cdnfonts.com/css/formula1-display" rel="stylesheet">
 <style>
+/* ... [Keep existing CSS exactly as is] ... */
 *, *::before, *::after { box-sizing: border-box; }
 :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #fff; --move-x: 0px; --move-y: 0px; }
 body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; position: relative; }
@@ -51,7 +52,6 @@ option { background: #333; }
 .item img { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; }
 .item a { font-weight: 700; font-size: 15px; color: #fff; text-decoration: none; }
 .tags { font-size: 13px; opacity: 0.75; }
-/* Error Alert Style */
 .alert-error {
     background: rgba(255, 0, 0, 0.15);
     border: 1px solid rgba(255, 0, 0, 0.3);
@@ -127,6 +127,8 @@ option { background: #333; }
                     @csrf
                     <input type="text" name="title" placeholder="Song title (optional)" value="{{ old('title') }}">
                     <input type="text" name="artist" placeholder="Artist (required)" required value="{{ old('artist') }}">
+                    <input type="text" name="genre" placeholder="Genre (optional)" value="{{ old('genre') }}">
+                    
                     <input type="url" name="url" placeholder="http://googleusercontent.com/spotify.com/..." required value="{{ old('url') }}">
                     
                     <label style="font-size:13px; opacity:0.8;">Release date (optional)</label>
@@ -163,6 +165,7 @@ option { background: #333; }
                 <div style="flex:1; min-width:160px;">
                     <input type="text" name="q" placeholder="Search artist or title" value="{{ request('q') }}" style="width:100%; margin:0; padding:10px;">
                 </div>
+                
                 <div style="min-width:140px;">
                     <select name="genre" style="margin:0; padding:10px;">
                         <option value="">All genres</option>
@@ -171,20 +174,23 @@ option { background: #333; }
                         @endforeach
                     </select>
                 </div>
+
                 <div style="min-width:140px;">
                     <select name="sort_by" style="margin:0; padding:10px;">
-                        <option value="created_at" {{ request('sort_by')=='created_at' ? 'selected' : '' }}>Newest</option>
-                        <option value="artist" {{ request('sort_by')=='artist' ? 'selected' : '' }}>Artist (A–Z)</option>
-                        <option value="title" {{ request('sort_by')=='title' ? 'selected' : '' }}>Title</option>
-                        <option value="rating_avg" {{ request('sort_by')=='rating_avg' ? 'selected' : '' }}>Rating</option>
+                        <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Newest</option>
+                        <option value="artist" {{ request('sort_by') == 'artist' ? 'selected' : '' }}>Artist (A–Z)</option>
+                        <option value="title" {{ request('sort_by') == 'title' ? 'selected' : '' }}>Title</option>
+                        <option value="rating_avg" {{ request('sort_by') == 'rating_avg' ? 'selected' : '' }}>Rating</option>
                     </select>
                 </div>
+
                 <div style="min-width:110px;">
                     <select name="order" style="margin:0; padding:10px;">
-                        <option value="desc" {{ request('order')=='desc' || !request('order') ? 'selected' : '' }}>Desc</option>
-                        <option value="asc" {{ request('order')=='asc' ? 'selected' : '' }}>Asc</option>
+                        <option value="desc" {{ request('order') == 'desc' || !request('order') ? 'selected' : '' }}>Desc</option>
+                        <option value="asc" {{ request('order') == 'asc' ? 'selected' : '' }}>Asc</option>
                     </select>
                 </div>
+
                 <button type="submit" class="btn btn-primary" style="padding:10px 20px;">Apply</button>
             </form>
         </div>
@@ -226,7 +232,7 @@ option { background: #333; }
 
 <div class="waves-container waves-bottom">
     <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-    <defs><path id="gentle-wave-bottom" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58-18 88 18 v44h-352z" /></defs>
+    <defs><path id="gentle-wave-bottom" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" /></defs>
     <g class="parallax">
     <use xlink:href="#gentle-wave-bottom" x="48" y="0" />
     <use xlink:href="#gentle-wave-bottom" x="48" y="3" />
