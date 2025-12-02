@@ -5,26 +5,39 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\MusicController;
 
 
+// ------------------------
+// Public Routes
+// ------------------------
+
 Route::get('/welcome', function () {
-    return view('welcome'); // this points to resources/views/welcome.blade.php
+    return view('welcome');
 })->name('welcome');
 
-Route::get('/welcome_clean', function () {
-    return view('welcome_clean'); // points to resources/views/welcome_clean.blade.php
-})->name('welcome_clean');
+// ------------------------
+// Welcome Clean (show bookmarks on right side)
+// ------------------------
 
-// Registration routes
+Route::get('/welcome_clean', [BookmarkController::class, 'showWelcome'])
+    ->middleware('auth')
+    ->name('welcome_clean');
+
+
+// ------------------------
+// Registration
+// ------------------------
+
 Route::get('/register', function () {
-    if (Auth::check()) {
-        return redirect('/');
-    }
+    if (Auth::check()) return redirect('/');
     return view('auth.register');
 })->name('register');
 
 Route::post('/register', function (Request $request) {
+
     $data = $request->validate([
         'name' => ['required','string','max:255'],
         'email' => ['required','email','max:255','unique:users,email'],
@@ -39,18 +52,22 @@ Route::post('/register', function (Request $request) {
 
     Auth::login($user);
     $request->session()->regenerate();
+
     return redirect('/welcome_clean');
 });
 
-// Simple auth routes (lightweight, uses the App\Models\User model)
+
+// ------------------------
+// Login
+// ------------------------
+
 Route::get('/login', function () {
-    if (Auth::check()) {
-        return redirect('/welcome_clean');
-    }
+    if (Auth::check()) return redirect('/welcome_clean');
     return view('auth.login');
 })->name('login');
 
 Route::post('/login', function (Request $request) {
+
     $credentials = $request->validate([
         'email' => ['required','email'],
         'password' => ['required'],
@@ -69,29 +86,32 @@ Route::post('/login', function (Request $request) {
 });
 
 
+// ------------------------
+// Logout
+// ------------------------
 
 Route::post('/logout', function (Request $request) {
     Auth::logout();
-
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-
-    return redirect()->route('welcome'); // redirect to welcome.blade.php
+    return redirect()->route('welcome');
 })->name('logout');
 
 
-// Note: dashboard removed; bookmarks app lives at /welcome_clean
+// ------------------------
+// Bookmarks (CRUD)
+// ------------------------
 
-// Bookmarks API (persisted per user)
-
-use App\Http\Controllers\BookmarkController;
-
-Route::middleware('auth')->group(function() {
-    Route::get('/bookmarks', [BookmarkController::class, 'index']);
+Route::middleware('auth')->group(function () {
+    Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks');
     Route::post('/bookmarks', [BookmarkController::class, 'store']);
     Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy']);
 });
 
+
+// ------------------------
+// Music Upload
+// ------------------------
 
 Route::middleware('auth')->group(function () {
     Route::get('/music', [MusicController::class, 'index'])->name('music.index');

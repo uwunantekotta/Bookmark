@@ -26,42 +26,6 @@ body {
     overflow-x: hidden;
 }
 
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background:
-    background-size: cover;
-    opacity: 0.2;
-    pointer-events: none;
-}
-
-/* LOGO LINK ANIMATION */
-.logo a {
-    text-decoration: none;
-    color: inherit;
-    position: relative;
-    transition: 0.25s ease;
-}
-.logo a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -4px;
-    width: 0%;
-    height: 2px;
-    background: #fff;
-    transition: 0.25s ease;
-    border-radius: 50px;
-}
-.logo a:hover {
-    color: #00f0ff;
-    letter-spacing: 0.5px;
-}
-.logo a:hover::after {
-    width: 100%;
-}
-
 header {
     width: 100%;
     max-width: 1200px;
@@ -79,12 +43,17 @@ header h1 {
     margin: 0;
 }
 
-.user-info {
-    text-align: right;
-    font-size: 13px;
+nav a {
+    margin-right: 18px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.2s;
 }
 
-.user-info strong { font-weight: 700; }
+nav a:hover {
+    color: #00f0ff;
+}
 
 .logout-btn {
     padding: 8px 12px;
@@ -108,14 +77,10 @@ main {
     margin: 30px auto;
     display: flex;
     gap: 24px;
-    z-index: 1;
     padding: 0 18px;
 }
 
-/* LEFT COLUMN */
-.column-left {
-    flex: 1;
-}
+.column-left { flex: 1; }
 
 .card {
     width: 100%;
@@ -124,22 +89,17 @@ main {
     border-radius: 16px;
     padding: 24px 18px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 .card h2 {
     font-family: 'Formula1 Display', sans-serif;
     font-size: 24px;
-    margin-bottom: 6px;
     text-align: center;
 }
 
 .card p {
     font-size: 13px;
     opacity: 0.85;
-    margin-bottom: 16px;
     text-align: center;
 }
 
@@ -152,13 +112,6 @@ input[type="text"], input[type="url"], input[type="file"] {
     color: #fff;
     margin-bottom: 8px;
     font-size: 15px;
-    outline: none;
-    transition: 0.2s;
-}
-
-input:focus {
-    border-color: #00f0ff;
-    background: rgba(255,255,255,0.15);
 }
 
 .btn {
@@ -168,7 +121,6 @@ input:focus {
     cursor: pointer;
     font-size: 15px;
     font-weight: 600;
-    transition: 0.2s;
 }
 
 .btn-primary { background: #fff; color: #0057ff; }
@@ -177,7 +129,6 @@ input:focus {
 .btn-ghost { background: rgba(255,255,255,0.25); color: #fff; border:1px solid rgba(255,255,255,0.3); }
 .btn-ghost:hover { background: rgba(255,255,255,0.35); }
 
-/* RIGHT COLUMN */
 .column-right {
     flex: 1;
     display: flex;
@@ -187,17 +138,11 @@ input:focus {
 
 .item {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     gap: 12px;
     padding: 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
     border-radius: 8px;
     background: rgba(255,255,255,0.05);
-    transition: 0.2s;
 }
-
-.item:hover { background: rgba(255,255,255,0.1); }
 
 .item img {
     width: 72px;
@@ -217,38 +162,28 @@ input:focus {
     font-size: 13px;
     opacity: 0.75;
 }
-
-.actions {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-#alert {
-    margin-top: 12px;
-    font-size: 13px;
-    text-align: center;
-    min-height: 18px;
-}
-
-.small {
-    font-size: 13px;
-    opacity: 0.8;
-    margin-top: 14px;
-    text-align: center;
-}
 </style>
 </head>
+
 <body>
 
 <header>
-    <h1 class="logo">
-        <a href="{{ route('welcome') }}">Audiobook</a>
+    <!-- Logo -->
+    <h1>
+        <a href="{{ route('welcome') }}" style="color:white;text-decoration:none;">Audiobook</a>
     </h1>
 
-    <div style="display:flex;align-items:center;gap:12px">
+    <!-- Navigation -->
+    <nav>
+        <a href="{{ route('welcome') }}">Home</a>
+        <a href="{{ route('bookmarks') }}">Add Bookmark</a>
+        <a href="{{ route('bookmarks') }}">Bookmarks</a>
+    </nav>
+
+    <!-- Auth -->
+    <div style="display:flex;align-items:center;">
         @auth
-            <div class="user-info">
+            <div style="text-align:right;font-size:13px;">
                 Signed in as<br><strong>{{ Auth::user()->name }}</strong>
             </div>
             <form method="POST" action="{{ url('/logout') }}">
@@ -260,41 +195,55 @@ input:focus {
 </header>
 
 <main>
-    <!-- LEFT: Add bookmark -->
+    <!-- LEFT COLUMN — ADD BOOKMARK -->
     <div class="column-left">
         <div class="card">
             <h2>Add Music Bookmark</h2>
-            <p>Save songs, album pages, artist pages, and streaming links for later.</p>
+            <p>Save songs, album pages, artist pages, and streaming links.</p>
 
-            <form id="addForm" enctype="multipart/form-data" style="width:100%; display:flex; flex-direction:column; gap:8px;">
-                <input type="text" id="title" placeholder="Song title (optional)">
-                <input type="text" id="artist" placeholder="Artist (required)" required>
-                <input type="url" id="url" placeholder="https://open.spotify.com/track/..." required>
-                <label for="image" style="font-size:13px; opacity:0.8;">Attach photo (optional)</label>
-                <input type="file" id="image" accept="image/*">
+            <form action="{{ url('/bookmarks') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="text" name="title" placeholder="Song title (optional)">
+                <input type="text" name="artist" placeholder="Artist (required)" required>
+                <input type="url" name="url" placeholder="https://open.spotify.com/track/..." required>
+                <label style="font-size:13px; opacity:0.8;">Attach photo (optional)</label>
+                <input type="file" name="image" accept="image/*">
 
                 <div style="display:flex; gap:8px; justify-content:center; margin-top:4px;">
                     <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="button" id="clearAll" class="btn btn-ghost">Clear all</button>
+                    <button type="reset" class="btn btn-ghost">Clear</button>
                 </div>
             </form>
 
-            <input type="text" id="q" placeholder="Search bookmarks..." style="margin-top:12px; width:100%; padding:12px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); color:#fff; outline:none; font-size:15px;">
-
-            <div id="alert" role="status"></div>
+            @if(session('success'))
+                <p style="margin-top:10px;text-align:center;color:#00f0ff;font-size:14px;">
+                    {{ session('success') }}
+                </p>
+            @endif
         </div>
     </div>
 
-    <!-- RIGHT: Bookmarked songs -->
-    <div class="column-right" id="list"></div>
+    <!-- RIGHT COLUMN — SHOW SAVED BOOKMARKS -->
+    <div class="column-right">
+        @foreach ($bookmarks as $bookmark)
+            <div class="item">
+                <!-- Image -->
+                @if($bookmark->image)
+                    <img src="{{ asset('storage/' . $bookmark->image) }}">
+                @else
+                    <img src="https://via.placeholder.com/72">
+                @endif
+
+                <div style="flex:1;">
+                    <a href="{{ $bookmark->url }}" target="_blank">
+                        {{ $bookmark->title ?? 'Untitled Song' }}
+                    </a>
+                    <div class="tags">{{ $bookmark->artist }}</div>
+                </div>
+            </div>
+        @endforeach
+    </div>
 </main>
-
-<div class="small">Bookmarks are saved to your account and synced across devices when signed in.</div>
-
-<script>
-// JS logic remains the same from your previous script
-</script>
 
 </body>
 </html>
-
